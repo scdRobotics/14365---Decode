@@ -35,6 +35,7 @@ public class ShootTest extends LinearOpMode {
         boolean lastFrameB = false;
         boolean lastFrameX = false;
         boolean lastFrameY = false;
+        float dist = 0;
 
         servoBottom.setPosition(0.5);
         servoTop.setPosition(0.75);
@@ -67,14 +68,18 @@ public class ShootTest extends LinearOpMode {
             if(gamepad1.a) shootMotor.setPower(-power);
             else shootMotor.setPower(0);
 
+            if(aprilTagDetection.getDistance() != -Double.MAX_VALUE) dist = (float)aprilTagDetection.getDistance();
+            telemetry.addData("linear power", intake.getPowLinear(dist));
+            telemetry.addData("polynomial power", intake.getPower(dist));
+
             if(gamepad1.b && !lastFrameB)
             {
-                shoot(intake.getPowLinear((float)aprilTagDetection.getDistance()));
+                shoot(intake.getPowLinear(dist));
                 lastFrameB = true;
             }
             if(gamepad1.x && !lastFrameX)
             {
-                shoot(intake.getPower((float)aprilTagDetection.getDistance()));
+                shoot(intake.getPower(dist));
                 lastFrameX = true;
             }
             if(gamepad1.y && !lastFrameY)
