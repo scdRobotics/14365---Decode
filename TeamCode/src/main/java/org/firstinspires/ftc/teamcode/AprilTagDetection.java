@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -165,5 +167,71 @@ public class AprilTagDetection {
         if(!seenTower) distance = -Double.MAX_VALUE;
         return cent;
 
+    }
+    public void moveToGoalDistance(List<DcMotor> motors, double distance, float power, int precision)
+    {
+        while(getDistance() == -Double.MAX_VALUE)
+        {
+            for(DcMotor motor : motors) motor.setPower(power);
+        }
+        for(DcMotor motor : motors) motor.setPower(0);
+
+        for(int i = 1; i <= precision; i++)
+        {
+            while(getDistance() < distance)
+            {
+                for(DcMotor motor : motors) motor.setPower(power/i);
+            }
+            while(getDistance() > distance)
+            {
+                for(DcMotor motor : motors) motor.setPower(-power/i);
+            }
+        }
+        for(DcMotor motor : motors) motor.setPower(0);
+    }
+    public void turnToCenterGoal(List<DcMotor> motors, float power, int precision)
+    {
+        int center = (int)this.telemetryAprilTag().x;
+        for(int i = 1; i <= precision; i++) {
+
+            while (middleOfScreenX > center)
+            {
+                motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(0).setPower(-power/i);
+
+                motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(1).setPower(-power/i);
+
+                motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(2).setPower(power/i);
+
+                motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(3).setPower(power/i);
+            }
+
+            while (middleOfScreenX < center)
+            {
+                motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(0).setPower(power/i);
+
+                motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(1).setPower(power/i);
+
+                motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(2).setPower(-power/i);
+
+                motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motors.get(3).setPower(-power/i);
+            }
+
+            for (DcMotor motor : motors)
+            {
+                motor.setPower(0);
+            }
+        }
+        for (DcMotor motor : motors)
+        {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
     }
 }

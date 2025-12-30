@@ -32,8 +32,8 @@ public class Intake extends LinearOpMode
 
     DcMotor shootMotor, intakeMotor;
     Servo servoBottom, servoTop;
-    final float bottomDownPos = 0.5f;
-    final float bottomUpPos = 0.55f;
+    final float bottomClosePos = 0.5f;
+    final float bottomOpenPos = 0.55f;
     final float topClosePos = 0.75f;
     final float topOpenPos = 0.9f;
 
@@ -273,7 +273,7 @@ public class Intake extends LinearOpMode
 
     public void openBottomServo(boolean open)
     {
-        servoBottom.setPosition(open ? bottomUpPos : bottomDownPos);
+        servoBottom.setPosition(open ? bottomOpenPos : bottomClosePos);
     }
     public void openTopServo(boolean open)
     {

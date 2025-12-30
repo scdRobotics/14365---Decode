@@ -1,26 +1,42 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.List;
 
-@Autonomous
-public class AutoTest extends LinearOpMode {
+public class RobotController {
+    HardwareMap hardwareMap;
+    Telemetry telemetry;
+    Intake intake;
+    AprilTagDetection aprilTagDetection;
 
-    public void runOpMode()
+    IMU imu;
+    DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
+    List<DcMotor> motors;
+    public RobotController(HardwareMap hardwareMap, Telemetry telemetry)
     {
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        this.hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
 
-        IMU imu = hardwareMap.get(IMU.class, "imu");
+        this.frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
+        this.backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
+        this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
+        this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        List<DcMotor> motors = List.of(frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor);
+        this.intake = new Intake(hardwareMap, telemetry);
+        this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry);
+
+        this.imu = hardwareMap.get(IMU.class, "imu");
+
+        this.motors = List.of(frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor);
 
         for(DcMotor motor : motors)
         {
@@ -28,19 +44,10 @@ public class AutoTest extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        //unique lines start here
-
-        moveBackward(motors, 490, .5f);
-        turnToAngle(motors, imu, 330f, 0.5f, 5);
-        moveLeft(motors, 244, 0.5f);
-
-        //moveForward(motors, 1500, 0.5f);
+        this.frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-
-    public void moveForward(List<DcMotor> motors, int ticks, float power)
+    public void moveForward(int ticks, float power)
     {
         for (DcMotor motor : motors)
         {
@@ -49,7 +56,7 @@ public class AutoTest extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
     }
-    public void moveBackward(List<DcMotor> motors, int ticks, float power)
+    public void moveBackward(int ticks, float power)
     {
         for (DcMotor motor : motors)
         {
@@ -58,7 +65,7 @@ public class AutoTest extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
     }
-    public void moveLeft(List<DcMotor> motors, int ticks, float power)
+    public void moveLeft(int ticks, float power)
     {
         motors.get(0).setTargetPosition(-ticks);
         motors.get(0).setPower(power);
@@ -76,7 +83,7 @@ public class AutoTest extends LinearOpMode {
         motors.get(3).setPower(power);
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-    public void moveRight(List<DcMotor> motors, int ticks, float power)
+    public void moveRight(int ticks, float power)
     {
         motors.get(0).setTargetPosition(ticks);
         motors.get(0).setPower(power);
@@ -95,43 +102,38 @@ public class AutoTest extends LinearOpMode {
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void turnToAngle(List<DcMotor> motors, IMU imu, float angle, float power, int precision)
+    public void turnToAngle(float angle, float power, int precision)
     {
-        for(int i = 0; i < precision; i++) {
+        for(int i = 1; i <= precision; i++) {
 
             while (imu.getRobotYawPitchRollAngles().getYaw() < angle)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(0).setPower(-power);
+                motors.get(0).setPower(-power/i);
 
                 motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(1).setPower(-power);
+                motors.get(1).setPower(-power/i);
 
                 motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(2).setPower(power);
+                motors.get(2).setPower(power/i);
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(3).setPower(power);
+                motors.get(3).setPower(power/i);
             }
 
-            for (DcMotor motor : motors)
-            {
-                motor.setPower(0);
-            }
-
-            while (imu.getRobotYawPitchRollAngles().getYaw() < angle)
+            while (imu.getRobotYawPitchRollAngles().getYaw() > angle)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(0).setPower(power);
+                motors.get(0).setPower(power/i);
 
                 motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(1).setPower(power);
+                motors.get(1).setPower(power/i);
 
                 motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(2).setPower(-power);
+                motors.get(2).setPower(-power/i);
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(3).setPower(-power);
+                motors.get(3).setPower(-power/i);
             }
 
             for (DcMotor motor : motors)
@@ -144,4 +146,30 @@ public class AutoTest extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
+    public void shoot3(float power)
+    {
+        intake.shoot3(power);
+    }
+    public void shoot(float power)
+    {
+        intake.shoot(power);
+    }
+    public void turnToCenterGoal(float power, int precision)
+    {
+        aprilTagDetection.turnToCenterGoal(motors, power, precision);
+    }
+    public void moveToGoalDistance(double distance, float power, int precision)
+    {
+        aprilTagDetection.moveToGoalDistance(motors, distance, power, precision);
+    }
+    public float getPow()
+    {
+        return intake.getPower((float)aprilTagDetection.getDistance());
+    }
+    public float getPowLinear()
+    {
+        return intake.getPowLinear((float)aprilTagDetection.getDistance());
+    }
+
+
 }
