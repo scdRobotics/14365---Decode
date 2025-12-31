@@ -3,26 +3,28 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class ShootTest extends LinearOpMode {
-    final float interval = 10f;
+    final float interval = 50f;
     final int TPR = 28;
-    float power = 1;
+    float power = 0;
     float bottomServoExtendedPos = 0.5f;
     float topServoExtendedPos = 0.6f;
 
-    DcMotor shootMotor; //Ticks Per Rotation = 28
+    DcMotorEx shootMotor; //Ticks Per Rotation = 28
     Servo servoTop, servoBottom;
 
     IMU imu;
     @Override
     public void runOpMode() throws InterruptedException {
         waitForStart();
-        shootMotor = hardwareMap.dcMotor.get("shootMotor");
-        shootMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shootMotor = hardwareMap.get(DcMotorEx.class, "shootMotor");
+        //shootMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shootMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         servoBottom = hardwareMap.get(Servo.class, "bottomIntakeServo");
         servoTop = hardwareMap.get(Servo.class, "topIntakeServo");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -73,8 +75,6 @@ public class ShootTest extends LinearOpMode {
                 power-=interval;
                 lastFrameDPad = true;
             }
-            if(power < 0) power = 0;
-            if(power > 1) power = 1;
             telemetry.addLine("press dpad up/down to increase/decrease power");
             telemetry.addLine("hold 'a' to spin shootMotor \n");
 
@@ -83,22 +83,22 @@ public class ShootTest extends LinearOpMode {
             telemetry.addData("shootPosition", shootMotor.getCurrentPosition());
 
             telemetry.addData("power", power);
+            telemetry.addData("velocity", shootMotor.getVelocity());
             telemetry.addData("calculated Distance", aprilTagDetection.getDistance());
             if(gamepad1.a) shootMotor.setPower(-power);
             else shootMotor.setPower(0);
 
             if(aprilTagDetection.getDistance() != -Double.MAX_VALUE) dist = (float)aprilTagDetection.getDistance();
-            telemetry.addData("linear power", intake.getPowLinear(dist));
             telemetry.addData("polynomial power", intake.getPolynomialPower(dist));
 
             if(gamepad1.b && !lastFrameB)
             {
-                intake.shoot(intake.getPowLinear(dist));
+                intake.shoot3(intake.getPowLinear(dist));
                 lastFrameB = true;
             }
             if(gamepad1.x && !lastFrameX)
             {
-                intake.shoot(intake.getPolynomialPower(dist));
+                intake.shoot3(intake.getPolynomialPower(dist));
                 lastFrameX = true;
             }
             if(gamepad1.y && !lastFrameY)
@@ -106,6 +106,7 @@ public class ShootTest extends LinearOpMode {
                 intake.shoot(power);
                 lastFrameY = true;
             }
+            if(gamepad1.right_bumper) intake.loadNextBall();
 
             //servoBottom.setPosition(bottomServoExtendedPos);
             //servoTop.setPosition(topServoExtendedPos);
