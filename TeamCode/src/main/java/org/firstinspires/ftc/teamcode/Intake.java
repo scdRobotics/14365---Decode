@@ -221,6 +221,15 @@ public class Intake extends LinearOpMode
         return (float)(-3*Math.pow(10,-8)*Math.pow(dist,4) + 7*Math.pow(10,-6)*Math.pow(dist,3) - 0.0005*Math.pow(dist,2) + 0.0193*dist + 0.4762);
     }
 
+    public float getPolynomialPower(float dist)
+    {
+        float x = dist;
+        if(x >= 79) return .95f;
+        if(x>=82) return 1;
+        return (float)((-9.067967) + (1.034644*x) - (0.04235704*Math.pow(x,2)) + (0.0008433102*Math.pow(x,3)) - (0.000008162713*Math.pow(x,4)) + (3.080374*Math.pow(10,-8)*Math.pow(x,5)));
+
+    }
+
     //R^2 = 0.9593
     public float getPowLinear(float dist)
     {
@@ -242,9 +251,9 @@ public class Intake extends LinearOpMode
         shootMotor.setPower(-power);
         sleepTime(4000);
         loadNextBall();
-        sleepTime(250);
+        sleepTime(1300);
         loadNextBall();
-        sleepTime(250);
+        sleepTime(1300);
         loadNextBall();
 
         shootMotor.setPower(0);

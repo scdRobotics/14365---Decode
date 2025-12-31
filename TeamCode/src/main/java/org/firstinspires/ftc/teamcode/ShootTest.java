@@ -8,7 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class ShootTest extends LinearOpMode {
-    final float interval = 0.05f;
+    final float interval = 10f;
+    final int TPR = 28;
     float power = 1;
     float bottomServoExtendedPos = 0.5f;
     float topServoExtendedPos = 0.6f;
@@ -35,6 +36,13 @@ public class ShootTest extends LinearOpMode {
         boolean lastFrameB = false;
         boolean lastFrameX = false;
         boolean lastFrameY = false;
+
+        long lastFrameShootMotorPos = 0;
+        long lastFrameTime = 0;
+
+        long deltaTime = 0;
+        long deltaShootMotorPos = 0;
+
         float dist = 0;
 
         servoBottom.setPosition(0.5);
@@ -42,6 +50,17 @@ public class ShootTest extends LinearOpMode {
 
         while(opModeIsActive())
         {
+            telemetry.addData("system time", System.currentTimeMillis());
+            telemetry.addData("last frame time", lastFrameTime);
+            deltaTime = System.currentTimeMillis()-lastFrameTime;
+            deltaShootMotorPos = shootMotor.getCurrentPosition() - lastFrameShootMotorPos;
+            if(deltaTime!=0)
+            {
+                double RPM = deltaShootMotorPos / deltaTime / TPR * 60000;
+                telemetry.addData("RPM", RPM);
+            }
+            else telemetry.addLine("deltaTime is 0!!!");
+
             aprilTagDetection.telemetryAprilTag();
 
             if(gamepad1.dpad_up && !lastFrameDPad)
@@ -70,21 +89,21 @@ public class ShootTest extends LinearOpMode {
 
             if(aprilTagDetection.getDistance() != -Double.MAX_VALUE) dist = (float)aprilTagDetection.getDistance();
             telemetry.addData("linear power", intake.getPowLinear(dist));
-            telemetry.addData("polynomial power", intake.getPower(dist));
+            telemetry.addData("polynomial power", intake.getPolynomialPower(dist));
 
             if(gamepad1.b && !lastFrameB)
             {
-                shoot(intake.getPowLinear(dist));
+                intake.shoot(intake.getPowLinear(dist));
                 lastFrameB = true;
             }
             if(gamepad1.x && !lastFrameX)
             {
-                shoot(intake.getPower(dist));
+                intake.shoot(intake.getPolynomialPower(dist));
                 lastFrameX = true;
             }
             if(gamepad1.y && !lastFrameY)
             {
-                shoot(power);
+                intake.shoot(power);
                 lastFrameY = true;
             }
 
@@ -105,48 +124,11 @@ public class ShootTest extends LinearOpMode {
             if(!gamepad1.dpad_down && !gamepad1.dpad_up) lastFrameDPad = false;
             if(!gamepad1.b) lastFrameB = false;
             if(!gamepad1.x) lastFrameX = false;
-            if(!lastFrameY) lastFrameY = false;
+            if(!gamepad1.y) lastFrameY = false;
+
+            lastFrameShootMotorPos = shootMotor.getCurrentPosition();
+            lastFrameTime = System.currentTimeMillis();
         }
-    }
-
-
-    public void shoot(float power)
-    {
-        //spin shootMotor
-        shootMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shootMotor.setPower(-power);
-        //wait seconds
-        sleepTime(4000);
-        loadNextBall();
-    }
-
-    public void shoot3(float power)
-    {
-        shootMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shootMotor.setPower(-power);
-        sleepTime(4000);
-        loadNextBall();
-        sleepTime(500);
-        loadNextBall();
-        sleepTime(500);
-        loadNextBall();
-
-        shootMotor.setPower(0);
-    }
-    void loadNextBall()
-    {
-        openBottomServo(true);
-        //wait less than second
-        sleepTime(500);
-        //close servoBottom
-        openBottomServo(false);
-        sleepTime(75);
-        //open servoTop
-        openTopServo(true);
-        //wait <second
-        sleepTime(500);
-        //close servoTop
-        openTopServo(false);
     }
 
     private void sleepTime(long ms)

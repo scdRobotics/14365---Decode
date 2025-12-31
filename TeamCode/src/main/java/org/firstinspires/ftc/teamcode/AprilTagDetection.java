@@ -102,7 +102,7 @@ public class AprilTagDetection {
         //builder.enableLiveView(true);
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
-        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
 
         // Choose whether or not LiveView stops if no processors are enabled.
         // If set "true", monitor shows solid orange screen if no processors enabled.
@@ -172,7 +172,8 @@ public class AprilTagDetection {
     {
         while(getDistance() == -Double.MAX_VALUE)
         {
-            for(DcMotor motor : motors) motor.setPower(power);
+            telemetryAprilTag();
+            for(DcMotor motor : motors) motor.setPower(-power);
         }
         for(DcMotor motor : motors) motor.setPower(0);
 
@@ -180,11 +181,13 @@ public class AprilTagDetection {
         {
             while(getDistance() < distance)
             {
-                for(DcMotor motor : motors) motor.setPower(power/i);
+                for(DcMotor motor : motors) motor.setPower(-power/i);
+                telemetryAprilTag();
             }
             while(getDistance() > distance)
             {
-                for(DcMotor motor : motors) motor.setPower(-power/i);
+                for(DcMotor motor : motors) motor.setPower(power/i);
+                telemetryAprilTag();
             }
         }
         for(DcMotor motor : motors) motor.setPower(0);
@@ -207,6 +210,10 @@ public class AprilTagDetection {
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(3).setPower(power/i);
+
+                center = (int)this.telemetryAprilTag().x;
+                telemetry.addData("center detected", center);
+                telemetry.update();
             }
 
             while (middleOfScreenX < center)
@@ -222,6 +229,10 @@ public class AprilTagDetection {
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(3).setPower(-power/i);
+
+                center = (int)this.telemetryAprilTag().x;
+                telemetry.addData("center detected", center);
+                telemetry.update();
             }
 
             for (DcMotor motor : motors)

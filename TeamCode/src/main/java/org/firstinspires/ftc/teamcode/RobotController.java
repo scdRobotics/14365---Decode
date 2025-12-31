@@ -33,6 +33,10 @@ public class RobotController {
 
         this.intake = new Intake(hardwareMap, telemetry);
         this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry);
+        this.aprilTagDetection.initAprilTag();
+
+        this.intake.servoBottom.setPosition(0.5);
+        this.intake.servoTop.setPosition(0.75);
 
         this.imu = hardwareMap.get(IMU.class, "imu");
 
@@ -47,26 +51,49 @@ public class RobotController {
         this.frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         this.backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-    public void moveForward(int ticks, float power)
+    public boolean motorsAreBusy()
     {
+        for(DcMotor motor : motors)
+        {
+            if(motor.isBusy()) return true;
+        }
+        return false;
+    }
+    public void moveForward(int inches, float power)
+    {
+        int ticks = (int)(inches*32.26);
         for (DcMotor motor : motors)
         {
             motor.setTargetPosition(ticks);
             motor.setPower(power);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
+        while(motorsAreBusy());
+        for (DcMotor motor : motors)
+        {
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
-    public void moveBackward(int ticks, float power)
+    public void moveBackward(int inches, float power)
     {
+        int ticks = (int)(inches*32.26);
         for (DcMotor motor : motors)
         {
             motor.setTargetPosition(-ticks);
             motor.setPower(power);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
+        while(motorsAreBusy());
+        for (DcMotor motor : motors)
+        {
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
-    public void moveLeft(int ticks, float power)
+    public void moveLeft(int inches, float power)
     {
+        int ticks = (int)(inches*32.26);
         motors.get(0).setTargetPosition(-ticks);
         motors.get(0).setPower(power);
         motors.get(0).setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -82,9 +109,17 @@ public class RobotController {
         motors.get(3).setTargetPosition(-ticks);
         motors.get(3).setPower(power);
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while(motorsAreBusy());
+        for (DcMotor motor : motors)
+        {
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
-    public void moveRight(int ticks, float power)
+    public void moveRight(int inches, float power)
     {
+        int ticks = (int)(inches*32.26);
         motors.get(0).setTargetPosition(ticks);
         motors.get(0).setPower(power);
         motors.get(0).setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -100,6 +135,12 @@ public class RobotController {
         motors.get(3).setTargetPosition(ticks);
         motors.get(3).setPower(power);
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(motorsAreBusy());
+        for (DcMotor motor : motors)
+        {
+            motor.setPower(0);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
 
     public void turnToAngle(float angle, float power, int precision)
@@ -139,6 +180,7 @@ public class RobotController {
             for (DcMotor motor : motors)
             {
                 motor.setPower(0);
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
         }
         for (DcMotor motor : motors)
@@ -164,11 +206,29 @@ public class RobotController {
     }
     public float getPow()
     {
-        return intake.getPower((float)aprilTagDetection.getDistance());
+        while(aprilTagDetection.getDistance() < 0)
+        {
+            aprilTagDetection.telemetryAprilTag();
+            telemetry.addData("distance", aprilTagDetection.getDistance());
+            telemetry.update();
+        }
+
+        return intake.getPolynomialPower((float)aprilTagDetection.getDistance());
     }
-    public float getPowLinear()
+    public float getPowLinear() {
+        return intake.getPowLinear((float) aprilTagDetection.getDistance());
+    }
+    public void runCam()
     {
-        return intake.getPowLinear((float)aprilTagDetection.getDistance());
+        aprilTagDetection.telemetryAprilTag();
+    }
+    public double getDist()
+    {
+        return aprilTagDetection.getDistance();
+    }
+    public double getYaw()
+    {
+        return imu.getRobotYawPitchRollAngles().getYaw();
     }
 
 
