@@ -11,14 +11,14 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp
-public class Test extends LinearOpMode
+public class BlueTeleop extends LinearOpMode
 {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
-    public static double middleOfScreenX = 320;
-    public static double middleOfScreenY = 240;
+    public static double middleOfScreenX = 960;
 
     //public static final double leftSideMult = .8235;
 
@@ -43,7 +43,7 @@ public class Test extends LinearOpMode
         getCurrentGameTagLibrary();
         Point center = new Point();
         ArrayList<Integer> colorList;
-        AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry);
+        AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, "blue");
         Intake intake = new Intake(hardwareMap, telemetry);
         intake.openBottomServo(false);
         intake.openTopServo(false);
@@ -61,7 +61,7 @@ public class Test extends LinearOpMode
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        DcMotor[] motors = {frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor};
+        List<DcMotor> motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
         for(DcMotor motor : motors)
         {
@@ -86,9 +86,9 @@ public class Test extends LinearOpMode
         {
             center = aprilTagDetection.telemetryAprilTag();
 
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = gamepad1.right_stick_x;
+            double y = gamepad1.right_stick_y; // Remember, Y stick value is reversed
+            double x = -gamepad1.right_stick_x * 1.1; // Counteract imperfect strafing
+            double rx = gamepad1.left_stick_x;
 
             double frontLeftPower = -(y + x + rx);
             double backLeftPower = -(y - x + rx);
@@ -105,21 +105,29 @@ public class Test extends LinearOpMode
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
-
-            if(center.x > middleOfScreenX - 5) telemetry.addLine("move right");
-            if(center.x < middleOfScreenX + 5) telemetry.addLine("move left");
-
-            if(center.y > middleOfScreenY - 5) telemetry.addLine("move down");
-            if(center.y < middleOfScreenY + 5) telemetry.addLine("move up");
+            if(center.x < 920) telemetry.addLine("move left");
+            if(center.x > 1120) telemetry.addLine("move right");
 
             if(gamepad2.right_trigger != 0 && !lastFrameRightTrigger)
             {
                 if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
                 else intake.shoot3(intake.getPolynomialPower((float)aprilTagDetection.getDistance()));
             }
+            if(gamepad2.left_trigger != 0)
+            {
+                intake.shootMotor.setVelocity(1000);
+            }
+            if(gamepad2.left_bumper)
+            {
+                intake.shootMotor.setVelocity(0);
+            }
             if(gamepad2.right_bumper)
             {
-                intake.loadNextBall();
+                intake.dropBall();
+            }
+            if(gamepad2.a && aprilTagDetection.getDistance() > 0)
+            {
+                aprilTagDetection.turnToCenterGoal(motors, .4f, 3);
             }
             else intake.shootMotor.setPower(0);
             if(gamepad1.a) intake.servoTop.setPosition(intake.topOpenPos);
@@ -129,13 +137,17 @@ public class Test extends LinearOpMode
             telemetry.addData("backRightMotor", backRightMotor.getCurrentPosition());
             telemetry.addData("backLeftMotor", backLeftMotor.getCurrentPosition());
 
-            telemetry.addData("calculated Distance", aprilTagDetection.getDistance());
-
             if(aprilTagDetection.getDistance() < 0)
             {
                 telemetry.addLine("|||||||| Cannot find April Tag!!! ||||||||");
             }
             else telemetry.addData("aprilTag distance", aprilTagDetection.getDistance());
+
+            telemetry.addData("aprilTag X", center.x);
+            telemetry.addData("center of screen X", aprilTagDetection.middleOfScreenX);
+
+            telemetry.addData("center.x > middleScreen-10", center.x + " > " + (middleOfScreenX-10));
+            telemetry.addData("center.x < middleScreen+10", center.x + " < " + (middleOfScreenX+10));
 
             lastFrameRight = gamepad1.dpad_right;
             lastFrameLeft = gamepad1.dpad_left;

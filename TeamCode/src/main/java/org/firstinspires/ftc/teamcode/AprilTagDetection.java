@@ -20,9 +20,9 @@ public class AprilTagDetection {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
-    public static double middleOfScreenX = 320;
+    public static double middleOfScreenX = 960;
     public static double middleOfScreenY = 240;
-    public static final double focalLengthMM = 2.8; //600.075; //2.8mm focal length approximately: Logitech c922 pro
+    public static final double focalLengthMM = 2.8; //2.8mm focal length approximately: Logitech c922 pro
 
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -35,6 +35,7 @@ public class AprilTagDetection {
     private VisionPortal visionPortal;
     HardwareMap hardwareMap;
     Telemetry telemetry;
+    String color;
     private double distance;
 
 
@@ -47,6 +48,13 @@ public class AprilTagDetection {
     {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
+        this.color = "both";
+    }
+    public AprilTagDetection(HardwareMap hardwareMap, Telemetry telemetry, String color)
+    {
+        this.hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
+        this.color = color;
     }
     public double getDistance()
     {
@@ -126,6 +134,7 @@ public class AprilTagDetection {
      */
     ArrayList<Integer> colors = new ArrayList<>();
 
+
     public Point telemetryAprilTag() {
 
         List<org.firstinspires.ftc.vision.apriltag.AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -157,14 +166,22 @@ public class AprilTagDetection {
                     add(1);
                     add(2);
                 }};
-                if (detection.id == 20 || detection.id == 24) {
+                if( (color == "blue" || color == "both") && detection.id == 20)
+                {
                     distance = detection.ftcPose.range;
                     seenTower = true;
+                    cent = detection.center;
                 }
-                cent = detection.center;
+                if( (color == "red" || color == "both") && detection.id == 24)
+                {
+                    distance = detection.ftcPose.range;
+                    seenTower = true;
+                    cent = detection.center;
+                }
             }
         }
         if(!seenTower) distance = -Double.MAX_VALUE;
+        if(cent.x > 1700) cent.x-=720;
         return cent;
 
     }
@@ -196,42 +213,65 @@ public class AprilTagDetection {
     {
         int center = (int)this.telemetryAprilTag().x;
         for(int i = 1; i <= precision; i++) {
+/*          if(center.x < 920) telemetry.addLine("move left");
+            if(center.x > 1120) telemetry.addLine("move right");*/
 
-            while (middleOfScreenX > center)
+            while (center < 920)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(0).setPower(-power/i);
+                motors.get(0).setPower(power);
 
                 motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(1).setPower(-power/i);
+                motors.get(1).setPower(power);
 
                 motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(2).setPower(power/i);
+                motors.get(2).setPower(-power);
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(3).setPower(power/i);
+                motors.get(3).setPower(-power);
+
+                sleepTime(100);
+
+                for (DcMotor motor : motors)
+                {
+                    motor.setPower(0);
+                }
+
+                sleepTime(100);
 
                 center = (int)this.telemetryAprilTag().x;
                 telemetry.addData("center detected", center);
+                telemetry.addData("threshold", 920);
                 telemetry.update();
             }
 
-            while (middleOfScreenX < center)
+
+            while (center > 1120)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(0).setPower(power/i);
+                motors.get(0).setPower(-power);
 
                 motors.get(1).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(1).setPower(power/i);
+                motors.get(1).setPower(-power);
 
                 motors.get(2).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(2).setPower(-power/i);
+                motors.get(2).setPower(power);
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motors.get(3).setPower(-power/i);
+                motors.get(3).setPower(power);
+
+                sleepTime(100);
+
+                for (DcMotor motor : motors)
+                {
+                    motor.setPower(0);
+                }
+
+                sleepTime(100);
 
                 center = (int)this.telemetryAprilTag().x;
                 telemetry.addData("center detected", center);
+                telemetry.addData("threshold", 1120);
                 telemetry.update();
             }
 
@@ -244,5 +284,13 @@ public class AprilTagDetection {
         {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+    }
+    private void sleepTime(long ms)
+    {
+        long startTime = System.currentTimeMillis();
+        while(System.currentTimeMillis() - startTime < ms)
+        {
+
+        };
     }
 }

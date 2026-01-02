@@ -67,28 +67,17 @@ public class Intake extends LinearOpMode
         shootMotor.setVelocity(-power);
         //wait seconds
 
-        telemetry.addData("velocity", shootMotor.getVelocity());
-        telemetry.update();
-
         sleepTime(4000);
         loadNextBall();
     }
     public void shoot3(float power)
     {
         shootMotor.setVelocity(-power);
-        telemetry.addData("velocity", shootMotor.getVelocity());
-        telemetry.update();
-        sleepTime(4000);
-        telemetry.addData("velocity", shootMotor.getVelocity());
-        telemetry.update();
+        sleepTime(5000);
         loadNextBall();
-        sleepTime(1500);
-        telemetry.addData("velocity", shootMotor.getVelocity());
-        telemetry.update();
+        sleepTime(1300);
         loadNextBall();
-        sleepTime(1500);
-        telemetry.addData("velocity", shootMotor.getVelocity());
-        telemetry.update();
+        sleepTime(1300);
         loadNextBall();
 
         shootMotor.setVelocity(0);
@@ -101,12 +90,22 @@ public class Intake extends LinearOpMode
         //close servoBottom
         openBottomServo(false);
         sleepTime(75);
-        //open servoTop
+        dropBall();
+    }
+    void dropBall()
+    {
         openTopServo(true);
         //wait <second
         sleepTime(500);
         //close servoTop
         openTopServo(false);
+    }
+    private void waitForVelo(float power)
+    {
+        while(Math.abs(shootMotor.getVelocity()) < power)
+        {
+
+        }
     }
 
     private void sleepTime(long ms)
@@ -114,8 +113,7 @@ public class Intake extends LinearOpMode
         long startTime = System.currentTimeMillis();
         while(System.currentTimeMillis() - startTime < ms)
         {
-            telemetry.addData("velocity", shootMotor.getVelocity());
-            telemetry.update();
+
         };
     }
 
