@@ -166,13 +166,13 @@ public class AprilTagDetection {
                     add(1);
                     add(2);
                 }};
-                if( (color == "blue" || color == "both") && detection.id == 20)
+                if((color.equals("blue") || color.equals("both")) && detection.id == 20)
                 {
                     distance = detection.ftcPose.range;
                     seenTower = true;
                     cent = detection.center;
                 }
-                if( (color == "red" || color == "both") && detection.id == 24)
+                if((color.equals("red") || color.equals("both")) && detection.id == 24)
                 {
                     distance = detection.ftcPose.range;
                     seenTower = true;
@@ -211,12 +211,30 @@ public class AprilTagDetection {
     }
     public void turnToCenterGoal(List<DcMotor> motors, float power, int precision)
     {
+        turnToCenterGoal(motors, power, precision, 0);
+    }
+    public void turnToCenterGoal(List<DcMotor> motors, float power, int precision, int offset)
+    {
+        //waiting (:
+        while(getDistance() < 0)
+        {
+            telemetryAprilTag();
+        }
+        //no more waiting (:
+
         int center = (int)this.telemetryAprilTag().x;
         for(int i = 1; i <= precision; i++) {
 /*          if(center.x < 920) telemetry.addLine("move left");
             if(center.x > 1120) telemetry.addLine("move right");*/
 
-            while (center < 920)
+            //turn right
+            /*if(center == 0)
+            {
+                telemetry.addLine("missing apriltag");
+                telemetry.update();
+                break;
+            }*/
+            while (center < 960 + offset)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(0).setPower(power);
@@ -245,8 +263,8 @@ public class AprilTagDetection {
                 telemetry.update();
             }
 
-
-            while (center > 1120)
+            //turn left
+            while (center > 1140 + offset)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(0).setPower(-power);
@@ -291,6 +309,6 @@ public class AprilTagDetection {
         while(System.currentTimeMillis() - startTime < ms)
         {
 
-        };
+        }
     }
 }

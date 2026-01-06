@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.ArrayList;
 
-@TeleOp
+//@TeleOp
 public class Physics extends LinearOpMode {
 
     double angle = 50;

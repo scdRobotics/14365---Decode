@@ -7,13 +7,17 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class BottomRedAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        RobotController rc = new RobotController(hardwareMap, telemetry);
+        RobotController rc = new RobotController(hardwareMap, telemetry, "red");
 
         waitForStart();
 
-        rc.moveToGoalDistance(36, .5f, 3);
-        rc.turnToCenterGoal(0.5f, 5);
-        rc.shoot3(0.7775f);
-        rc.moveLeft(200, 0.5f);
+        rc.moveBackward(45, 0.4f);
+        rc.moveRight(6,0.2f);
+        rc.moveBackward(8,0.4f);
+        rc.turnToCenterGoal(0.4f, 3, -100);
+        telemetry.addData("velo to shoot at", rc.getPow());
+        telemetry.update();
+        rc.shoot3(rc.getPow());
+        rc.moveRight(15, 0.5f);
     }
 }

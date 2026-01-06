@@ -7,18 +7,23 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
 @TeleOp
 public class ShootTest extends LinearOpMode {
-    final float interval = 50f;
+    final float interval = 25f;
     final int TPR = 28;
-    float power = 0;
+    float power = 900;
     float bottomServoExtendedPos = 0.5f;
     float topServoExtendedPos = 0.6f;
 
     DcMotorEx shootMotor; //Ticks Per Rotation = 28
     Servo servoTop, servoBottom;
-
     IMU imu;
+
     @Override
     public void runOpMode() throws InterruptedException {
         waitForStart();
@@ -34,6 +39,23 @@ public class ShootTest extends LinearOpMode {
 
         aprilTagDetection.initAprilTag();
 
+        Map<Integer, Integer> powers = new HashMap<>();
+        powers.put(94,1850);
+        powers.put(93, 1850);
+        powers.put(92,1850);
+        powers.put(91, 1800);
+        powers.put(90, 1800);
+        powers.put(89, 1750);
+        powers.put(88, 1750);
+        powers.put(87, 1725);
+        powers.put(86, 1725);
+        powers.put(85,1725);
+        powers.put(84, 1700);
+        powers.put(83, 1700);
+        powers.put(82, 1700);
+        powers.put(81, 1700);
+        powers.put(80, 1700);
+
         boolean lastFrameDPad = false;
         boolean lastFrameB = false;
         boolean lastFrameX = false;
@@ -47,8 +69,8 @@ public class ShootTest extends LinearOpMode {
 
         float dist = 0;
 
-        servoBottom.setPosition(0.5);
-        servoTop.setPosition(0.75);
+        servoBottom.setPosition(intake.bottomClosePos);
+        servoTop.setPosition(intake.topClosePos);
 
         while(opModeIsActive())
         {
@@ -75,6 +97,7 @@ public class ShootTest extends LinearOpMode {
                 power-=interval;
                 lastFrameDPad = true;
             }
+
             telemetry.addLine("press dpad up/down to increase/decrease power");
             telemetry.addLine("hold 'a' to spin shootMotor \n");
 
@@ -93,7 +116,7 @@ public class ShootTest extends LinearOpMode {
 
             if(gamepad1.b && !lastFrameB)
             {
-                intake.shoot3(intake.getPowLinear(dist));
+                intake.shoot3(power);
                 lastFrameB = true;
             }
             if(gamepad1.x && !lastFrameX)
@@ -101,10 +124,19 @@ public class ShootTest extends LinearOpMode {
                 intake.shoot3(intake.getPolynomialPower(dist));
                 lastFrameX = true;
             }
-            if(gamepad1.y && !lastFrameY)
+            if(gamepad1.y && !lastFrameY && dist != -Double.MAX_VALUE)
             {
-                intake.shoot(power);
-                lastFrameY = true;
+                if(powers.get((int)Math.ceil(dist)) == null || powers.get((int)Math.floor(dist)) == null)
+                {
+                    if(Math.ceil(dist) < 80) intake.shoot(1675);
+                }
+                else
+                {
+                    float power = (powers.get((int)Math.ceil(dist)) + powers.get((int)Math.floor(dist))) / 2;
+                    intake.shoot(power);
+                    telemetry.addData("hashmap power", power);
+                    lastFrameY = true;
+                }
             }
             if(gamepad1.right_bumper) intake.loadNextBall();
 
@@ -146,4 +178,5 @@ public class ShootTest extends LinearOpMode {
     {
         servoTop.setPosition(open ? 0.9 : 0.75);
     }
+
 }

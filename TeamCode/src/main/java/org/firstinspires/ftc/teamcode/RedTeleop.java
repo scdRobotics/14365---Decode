@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class BlueTeleop extends LinearOpMode
+public class RedTeleop extends LinearOpMode
 {
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -29,14 +29,13 @@ public class BlueTeleop extends LinearOpMode
         getCurrentGameTagLibrary();
         Point center = new Point();
         ArrayList<Integer> colorList;
-        AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, "blue");
+        AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, "red");
         Intake intake = new Intake(hardwareMap, telemetry);
         intake.openBottomServo(false);
         intake.openTopServo(false);
         Lifting lift = new Lifting(hardwareMap, telemetry);
 
-        float power = 1;
-        boolean lastFrameDPad = false;
+
 
         // Declare our motors
         // Make sure your ID's match your configuration
@@ -91,11 +90,6 @@ public class BlueTeleop extends LinearOpMode
             double x = -gamepad1.right_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.left_stick_x;
             if(rx == 0) rx = gamepad2.right_stick_x/3;
-            if(y == 0 && x == 0)
-            {
-                y = gamepad2.left_stick_y/2;
-                x = -gamepad2.left_stick_x * 1.1/2;
-            }
 
             double frontLeftPower = -(y + x + rx);
             double backLeftPower = -(y - x + rx);
@@ -143,10 +137,8 @@ public class BlueTeleop extends LinearOpMode
             //turn to goal
             if(gamepad2.a && aprilTagDetection.getDistance() > 0)
             {
-                aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                aprilTagDetection.turnToCenterGoal(motors, .4f, 3, -160 + manualPosOffset);
             }
-            else intake.shootMotor.setPower(0);
-
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
             {
                 manualPowerOffset += 25;
@@ -167,6 +159,7 @@ public class BlueTeleop extends LinearOpMode
                 manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
+            else intake.shootMotor.setPower(0);
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {
@@ -190,14 +183,13 @@ public class BlueTeleop extends LinearOpMode
 
             lastFrameRight = gamepad1.dpad_right;
             lastFrameLeft = gamepad1.dpad_left;
-            lastFrameDPad = gamepad1.dpad_down || gamepad1.dpad_up;
             lastFrameX = gamepad1.x;
             lastFrameY = gamepad1.y;
             if(!gamepad2.right_bumper) lastFrameRightBumper2 = false;
             if(!gamepad2.b) lastFrameB2 = false;
             if(gamepad2.left_trigger == 0) lastFrameLeftTrigger2 = false;
             if(!gamepad2.dpad_up) lastFrameDpadUp2 = false;
-            if(!gamepad2.dpad_down)lastFrameDpadDown2 = false;
+            if(!gamepad2.dpad_down) lastFrameDpadDown2 = false;
             if(!gamepad2.dpad_right) lastFrameDpadRight2 = false;
             if(!gamepad2.dpad_left) lastFrameDpadLeft2 = false;
 

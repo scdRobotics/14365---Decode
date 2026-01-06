@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class Lifting {
+@TeleOp
+public class Lifting extends LinearOpMode {
     HardwareMap hardwareMap;
     Telemetry telemetry;
 
@@ -31,6 +34,30 @@ public class Lifting {
         leftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftSlide = hardwareMap.dcMotor.get("leftSlide");
+        rightSlide = hardwareMap.dcMotor.get("rightSlide");
+
+        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        rightSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        while(opModeIsActive())
+        {
+            telemetry.addData("leftSlidePos", leftSlide.getCurrentPosition());
+            telemetry.addData("rightSlidePos", rightSlide.getCurrentPosition());
+
+            telemetry.update();
+        }
+    }
 
     public void telemetrySlideData()
     {
@@ -54,5 +81,11 @@ public class Lifting {
     {
         moveRightSlideToPosition(position);
         moveLeftSlideToPosition(position);
+    }
+
+    public int getSlidesPos()
+    {
+        if(leftSlide.getCurrentPosition() != rightSlide.getCurrentPosition()) return Integer.MIN_VALUE;
+        else return leftSlide.getCurrentPosition();
     }
 }

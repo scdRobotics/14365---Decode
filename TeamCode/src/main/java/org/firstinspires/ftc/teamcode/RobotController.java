@@ -23,6 +23,10 @@ public class RobotController {
     List<DcMotor> motors;
     public RobotController(HardwareMap hardwareMap, Telemetry telemetry)
     {
+        this(hardwareMap, telemetry, "both");
+    }
+    public RobotController(HardwareMap hardwareMap, Telemetry telemetry, String color)
+    {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
@@ -32,7 +36,7 @@ public class RobotController {
         this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
         this.intake = new Intake(hardwareMap, telemetry);
-        this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry);
+        this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, color);
         this.aprilTagDetection.initAprilTag();
 
         this.intake.servoBottom.setPosition(0.5);
@@ -195,6 +199,10 @@ public class RobotController {
     public void shoot(float power)
     {
         intake.shoot(power);
+    }
+    public void turnToCenterGoal(float power, int precision, int offset)
+    {
+        aprilTagDetection.turnToCenterGoal(motors, power, precision, offset);
     }
     public void turnToCenterGoal(float power, int precision)
     {

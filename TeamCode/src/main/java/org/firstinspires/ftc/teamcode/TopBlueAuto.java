@@ -5,13 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class TopBlueAuto extends LinearOpMode {
     public void runOpMode()
     {
-        RobotController rc = new RobotController(hardwareMap, telemetry);
+        RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
         waitForStart();
 
-        rc.moveBackward(100, 0.5f);
-        rc.turnToCenterGoal(0.5f, 5);
-        rc.shoot3(rc.getPowLinear());
-        rc.turnToAngle(0, .5f, 5);
-        rc.moveRight(2000, .5f);
+        rc.moveForward(3, 0.4f);
+        rc.turnToCenterGoal(.4f, 3, -30);
+        rc.shoot3(rc.getPow());
+        rc.intake.shootMotor.setVelocity(0);
+        rc.moveForward(20, 0.4f);
     }
 }
