@@ -66,7 +66,7 @@ public class RedTeleop extends LinearOpMode
         if (isStopRequested()) return;
 
         int manualPowerOffset = 0;
-        int manualPosOffset = 0;
+        int manualPosOffset = -200;
 
         boolean lastFrameLeft = false;
         boolean lastFrameRight = false;

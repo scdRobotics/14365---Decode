@@ -23,6 +23,7 @@ public class BlueTeleop extends LinearOpMode
     /**
      * The variable to store our instance of the vision portal.
      */
+    int manualPowerOffset = 0;
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -66,7 +67,7 @@ public class BlueTeleop extends LinearOpMode
 
         if (isStopRequested()) return;
 
-        int manualPowerOffset = 0;
+
         int manualPosOffset = 0;
 
         boolean lastFrameLeft = false;
@@ -83,6 +84,8 @@ public class BlueTeleop extends LinearOpMode
 
         boolean spinUpShootMotor = false;
 
+        float veloToShoot = 0;
+
         while (opModeIsActive())
         {
             center = aprilTagDetection.telemetryAprilTag();
@@ -90,7 +93,7 @@ public class BlueTeleop extends LinearOpMode
             double y = gamepad1.right_stick_y; // Remember, Y stick value is reversed
             double x = -gamepad1.right_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.left_stick_x;
-            if(rx == 0) rx = gamepad2.right_stick_x/3;
+            if(rx == 0) rx = gamepad2.right_stick_x/2;
             if(y == 0 && x == 0)
             {
                 y = gamepad2.left_stick_y/2;
@@ -113,12 +116,22 @@ public class BlueTeleop extends LinearOpMode
             if(gamepad2.right_trigger != 0)
             {
                 if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
-                else intake.shoot3(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
+                else
+                {
+                    veloToShoot = intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
+                }
             }
-            //timed shoot 3
-            if(gamepad2.y)
+            if(veloToShoot != 0)
             {
-                intake.shoot3Timed(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
+                telemetry.addData("velocity", veloToShoot);
+                if(intake.numShot == 4)
+                {
+                    intake.numShot = 0;
+                    intake.shooting = false;
+                    intake.loading = false;
+                    veloToShoot = 0;
+                }
+                intake.shoot3(veloToShoot);
             }
             //shoot 1
             if(gamepad2.x)
@@ -132,7 +145,6 @@ public class BlueTeleop extends LinearOpMode
                 lastFrameLeftTrigger2 = true;
             }
             if(spinUpShootMotor) intake.shootMotor.setVelocity(-1000);
-            else intake.shootMotor.setVelocity(0);
             //toggle top servo
             if(gamepad2.right_bumper && !lastFrameRightBumper2)
             {
@@ -145,7 +157,6 @@ public class BlueTeleop extends LinearOpMode
             {
                 aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
             }
-            else intake.shootMotor.setPower(0);
 
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
             {
@@ -176,7 +187,6 @@ public class BlueTeleop extends LinearOpMode
             }*/
 
 
-            if(gamepad1.a) intake.servoTop.setPosition(intake.topOpenPos);
 
             if(aprilTagDetection.getDistance() < 0)
             {
@@ -203,5 +213,10 @@ public class BlueTeleop extends LinearOpMode
 
             telemetry.update();
         }
+
+    }
+    float getManualOffset()
+    {
+        return manualPowerOffset;
     }
 }

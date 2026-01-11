@@ -9,9 +9,8 @@ public class TopRedAuto  extends LinearOpMode {
 
         waitForStart();
 
-        rc.moveForward(5, 0.4f);
-        rc.turnToCenterGoal(.4f, 5, -218);
-        rc.shoot3(rc.getPow()-15);
+        rc.shoot3(1700);
+        rc.intake.shootMotor.setVelocity(0);
         rc.moveForward(20, 0.4f);
     }
 }

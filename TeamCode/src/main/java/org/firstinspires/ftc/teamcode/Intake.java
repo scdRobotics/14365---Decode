@@ -5,15 +5,19 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 //@TeleOp
@@ -32,12 +36,19 @@ public class Intake extends LinearOpMode
     //dist, power
     private Map<Integer, Integer> powers = new HashMap<>();
 
+
+    //The value used to determine if there is a ball between the servos
+    final double ballMaxDistance = 10;
+    private DistanceSensor ballDistanceSensor;
+
     public Intake(HardwareMap hardwareMap, Telemetry telemetry)
     {
         shootMotor = hardwareMap.get(DcMotorEx.class, "shootMotor");
 
         servoBottom = hardwareMap.get(Servo.class, "bottomIntakeServo");
         servoTop = hardwareMap.get(Servo.class, "topIntakeServo");
+
+        ballDistanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
         powers.put(94,1850);
         powers.put(93, 1850);
@@ -96,6 +107,8 @@ public class Intake extends LinearOpMode
 
     public void shoot(float power)
     {
+        if (!isBallInChamber()) return;
+
         //spin shootMotor
         shootMotor.setVelocity(-power);
         //wait seconds
@@ -103,6 +116,7 @@ public class Intake extends LinearOpMode
         sleepTime(4000);
         loadNextBall();
     }
+    Timer timer = new Timer();
     public void shoot3Timed(float power)
     {
         shootMotor.setVelocity(-power);
@@ -116,34 +130,82 @@ public class Intake extends LinearOpMode
 
         shootMotor.setVelocity(0);
     }
+    boolean shooting = false;
+    boolean loading = false;
+    int numShot = 1;
     public void shoot3(float power)
     {
         shootMotor.setVelocity(-power);
-        waitForVelo(power);
-        loadNextBall();
-        waitForVelo(power);
-        loadNextBall();
-        waitForVelo(power);
-        loadNextBall();
-        openTopServo(true);
+        if(!shooting)
+        {
+            shooting = true;
+        }
+        if(!isBallInChamber())
+        {
+            shooting = false;
+            shootMotor.setVelocity(0);
+
+            loading = true;
+        }
+        if(shooting && isAtVelo(power))
+        {
+            loading = true;
+        }
+        if(loading)
+        {
+            loadNextBall();
+        }
+        if(numShot == 4) return;
     }
+
+    long time = 0;
+    long startTime = 0;
     void loadNextBall()
     {
-        openBottomServo(true);
+        if(startTime == 0) startTime = System.currentTimeMillis();
+        time = System.currentTimeMillis() - startTime;
+
+        if(time < 500);
+        else if(time < 800)
+        {
+            openBottomServo(true);
+        }
+        else if(time < 1300)
+        {
+            openBottomServo(false);
+        }
+        else if(time < 1700)
+        {
+            openTopServo(true);
+        }
+        else if(time < 2300)
+        {
+            openTopServo(false);
+        }
+        else
+        {
+            startTime = 0;
+            time = 0;
+            loading = false;
+            numShot++;
+        }
+/*
         //wait less than second
         sleepTime(500);
         //close servoBottom
-        openBottomServo(false);
+
         sleepTime(75);
-        dropBall();
-    }
-    void dropBall()
-    {
-        openTopServo(true);
+
+
         //wait <second
         sleepTime(500);
         //close servoTop
-        openTopServo(false);
+
+        loading = false;*/
+    }
+    void dropBall()
+    {
+
     }
     private void waitForVelo(float power)
     {
@@ -153,6 +215,10 @@ public class Intake extends LinearOpMode
 
         }
         sleepTime(500);
+    }
+    private boolean isAtVelo(float power)
+    {
+        return Math.abs(shootMotor.getVelocity()) > Math.min(1780, Math.abs(power));
     }
 
     private void sleepTime(long ms)
@@ -172,4 +238,6 @@ public class Intake extends LinearOpMode
     {
         servoTop.setPosition(open ? topOpenPos : topClosePos);
     }
+
+    boolean isBallInChamber() { return ballDistanceSensor.getDistance(DistanceUnit.CM) < ballMaxDistance; }
 }

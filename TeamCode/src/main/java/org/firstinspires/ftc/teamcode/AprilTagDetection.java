@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.qualcomm.hardware.lynx.LynxServoController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -37,6 +38,7 @@ public class AprilTagDetection {
     Telemetry telemetry;
     String color;
     private double distance;
+    private double bearing;
 
 
     double toMM(double in)
@@ -59,6 +61,10 @@ public class AprilTagDetection {
     public double getDistance()
     {
         return distance;
+    }
+    public double getBearing()
+    {
+        return bearing;
     }
     public void initAprilTag() {
 
@@ -169,12 +175,15 @@ public class AprilTagDetection {
                 if((color.equals("blue") || color.equals("both")) && detection.id == 20)
                 {
                     distance = detection.ftcPose.range;
+                    bearing = detection.ftcPose.bearing;
                     seenTower = true;
                     cent = detection.center;
+                    telemetry.addData("elevation", detection.ftcPose.elevation);
                 }
                 if((color.equals("red") || color.equals("both")) && detection.id == 24)
                 {
                     distance = detection.ftcPose.range;
+                    bearing = detection.ftcPose.bearing;
                     seenTower = true;
                     cent = detection.center;
                 }
@@ -224,16 +233,6 @@ public class AprilTagDetection {
 
         int center = (int)this.telemetryAprilTag().x;
         for(int i = 1; i <= precision; i++) {
-/*          if(center.x < 920) telemetry.addLine("move left");
-            if(center.x > 1120) telemetry.addLine("move right");*/
-
-            //turn right
-            /*if(center == 0)
-            {
-                telemetry.addLine("missing apriltag");
-                telemetry.update();
-                break;
-            }*/
             while (center < 960 + offset)
             {
                 motors.get(0).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

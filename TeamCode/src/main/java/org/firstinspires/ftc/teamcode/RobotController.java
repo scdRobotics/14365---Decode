@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -19,8 +20,10 @@ public class RobotController {
     AprilTagDetection aprilTagDetection;
 
     IMU imu;
+    double angleOffset;
     DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     List<DcMotor> motors;
+
     public RobotController(HardwareMap hardwareMap, Telemetry telemetry)
     {
         this(hardwareMap, telemetry, "both");
@@ -43,6 +46,8 @@ public class RobotController {
         this.intake.servoTop.setPosition(0.75);
 
         this.imu = hardwareMap.get(IMU.class, "imu");
+
+        angleOffset = imu.getRobotYawPitchRollAngles().getYaw();
 
         this.motors = List.of(frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor);
 
@@ -236,8 +241,15 @@ public class RobotController {
     }
     public double getYaw()
     {
-        return imu.getRobotYawPitchRollAngles().getYaw();
+        return imu.getRobotYawPitchRollAngles().getYaw() - angleOffset;
     }
 
+    public void turnToAngle(float angle, float power)
+    {
 
+    }
+    public double getBearing()
+    {
+        return aprilTagDetection.getBearing();
+    }
 }

@@ -8,9 +8,7 @@ public class TopBlueAuto extends LinearOpMode {
         RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
         waitForStart();
 
-        rc.moveForward(3, 0.4f);
-        rc.turnToCenterGoal(.4f, 3, -30);
-        rc.shoot3(rc.getPow());
+        rc.shoot3(1700);
         rc.intake.shootMotor.setVelocity(0);
         rc.moveForward(20, 0.4f);
     }
