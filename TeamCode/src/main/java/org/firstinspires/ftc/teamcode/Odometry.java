@@ -13,7 +13,7 @@ public class Odometry {
     DcMotorEx rightDeadwheel;
     DcMotorEx perpDeadwheel;
 
-    // CHANGE YEAR TO YEAR
+    // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
     final static double deadwheelDistance = 35.25; //cm; distance between deadwheels //13.875in
     final static double perpDistance = 17.78; //cm
 
@@ -55,6 +55,7 @@ public class Odometry {
             angle0 = startPose.angle;
             x0 = startPose.x;
             y0 = startPose.y;
+            
         }
     }
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color)
