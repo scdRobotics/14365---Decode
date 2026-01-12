@@ -13,7 +13,6 @@ public class Odometry {
     DcMotorEx rightDeadwheel;
     DcMotorEx perpDeadwheel;
 
-
     // CHANGE YEAR TO YEAR
     final static double deadwheelDistance = 35.25; //cm; distance between deadwheels //13.875in
     final static double perpDistance = 17.78; //cm
@@ -24,8 +23,8 @@ public class Odometry {
 
     String color;
 
-    private static final Point blueGoalPosition = new Point(340, 22);
-    private static final Point redGoalPosition = new Point(340, 320);
+    private static final Point blueGoalPosition = new Point(365.76, 0);
+    private static final Point redGoalPosition = new Point(365.76, 365.76);
 
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color, boolean isAuto)
     {
