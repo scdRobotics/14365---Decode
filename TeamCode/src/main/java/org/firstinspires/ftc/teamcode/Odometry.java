@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import java.util.List;
+
 public class Odometry {
     Telemetry telemetry;
     DcMotorEx leftDeadwheel;
@@ -26,9 +28,23 @@ public class Odometry {
     private static final Point blueGoalPosition = new Point(365.76, 0);
     private static final Point redGoalPosition = new Point(365.76, 365.76);
 
+
+    DcMotor frontLeftMotor;
+    DcMotor backLeftMotor;
+    DcMotor frontRightMotor;
+    DcMotor backRightMotor;
+    List<DcMotor> motors;
+
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color, boolean isAuto)
     {
         this.telemetry = telemetry;
+
+        this.frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
+        this.backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
+        this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
+        this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+
+        this.motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
         this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "leftSlide"); //left tick/rev = -2002.6 (forward)
         this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "rightSlide"); //right tick/rev = -2004.4 (forward)
@@ -55,7 +71,6 @@ public class Odometry {
             angle0 = startPose.angle;
             x0 = startPose.x;
             y0 = startPose.y;
-            
         }
     }
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color)
@@ -110,15 +125,9 @@ public class Odometry {
         telemetry.addData("deltaCenterY", deltaCenterY);
         telemetry.addData("currentAngle", Math.toDegrees(currentAngle));*/
     }
-    public double getAngle(AngleUnit unit)
-    {
-        if(unit == AngleUnit.DEGREES) return Math.toDegrees(currentAngle);
-        if(unit == AngleUnit.RADIANS) return currentAngle;
-        else return -404;
-    }
     public double getAngle()
     {
-        return getAngle(AngleUnit.DEGREES);
+        return currentAngle;
     }
     public Point getPosition()
     {
@@ -170,5 +179,30 @@ public class Odometry {
             return Math.atan(b/a);
         }
         return -404;
+    }
+    public void turnToAngle(double angle, float power)
+    {
+        double distMult = 0.3;
+        while(getAngle() < angle)
+        {
+            this.update();
+            double dist = Math.abs(getAngle()-angle);
+            double p = power * Math.min(1, dist*distMult);
+            frontLeftMotor.setPower(p);
+            backLeftMotor.setPower(p);
+            frontRightMotor.setPower(-p);
+            backRightMotor.setPower(-p);
+        }
+
+        while(getAngle() > angle)
+        {
+            this.update();
+            double dist = Math.abs(getAngle()-angle);
+            double p = power * Math.min(1, dist*distMult);
+            frontLeftMotor.setPower(-p);
+            backLeftMotor.setPower(-p);
+            frontRightMotor.setPower(p);
+            backRightMotor.setPower(p);
+        }
     }
 }

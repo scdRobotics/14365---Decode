@@ -29,7 +29,6 @@ public class BlueTeleop extends LinearOpMode
     {
         getCurrentGameTagLibrary();
         Point center = new Point();
-        ArrayList<Integer> colorList;
         AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, "blue");
         Intake intake = new Intake(hardwareMap, telemetry);
         intake.openBottomServo(false);
@@ -160,7 +159,8 @@ public class BlueTeleop extends LinearOpMode
             //turn to goal
             if(gamepad2.a && aprilTagDetection.getDistance() > 0)
             {
-                aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                //aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                odometry.turnToAngle(0, 1);
             }
 
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
@@ -190,8 +190,6 @@ public class BlueTeleop extends LinearOpMode
                 else lift.moveSlidesToPosition(lift.slideStartPosition);
                 lastFrameB2 = true;
             }*/
-
-
 
             if(aprilTagDetection.getDistance() < 0)
             {
