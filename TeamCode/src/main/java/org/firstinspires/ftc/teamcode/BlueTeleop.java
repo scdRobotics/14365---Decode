@@ -35,7 +35,7 @@ public class BlueTeleop extends LinearOpMode
         intake.openTopServo(false);
         Lifting lift = new Lifting(hardwareMap, telemetry);
 
-        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue");
+        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue", true, new Pose(0, 0, Math.PI));
 
         float power = 1;
         boolean lastFrameDPad = false;
@@ -160,7 +160,15 @@ public class BlueTeleop extends LinearOpMode
             if(gamepad2.a && aprilTagDetection.getDistance() > 0)
             {
                 //aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
-                odometry.turnToAngle(0, 1);
+                //odometry.turnToAngle(0, 1);
+                odometry.turnToAngle(odometry.getAngleToGoal(), 1);
+            }
+            if(gamepad2.y)
+            {
+                //reset the position values
+                Odometry.x0 = 0;
+                Odometry.y0 = 0;
+                Odometry.angle0 = 0;
             }
 
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
