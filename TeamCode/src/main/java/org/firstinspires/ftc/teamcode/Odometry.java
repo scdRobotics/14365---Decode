@@ -17,7 +17,7 @@ public class Odometry {
     DcMotorEx perpDeadwheel;
 
     // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
-    static double deadwheelDistance = 87.0966; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
+    static double deadwheelDistance = 34.3; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
     static double perpDistance = -7.77875; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
     static double parallelOffset = 6.985;
     /*
@@ -150,10 +150,11 @@ public class Odometry {
         currentAngle += dTheta;
 
         // Normalize heading
-        currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
+        //currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
 
         telemetry.addData("X", currentX);
         telemetry.addData("Y", currentY);
+        telemetry.addData("heading (rad)", currentAngle);
         telemetry.addData("Heading (deg)", Math.toDegrees(currentAngle));
     }
     public void odometryTelemetry()

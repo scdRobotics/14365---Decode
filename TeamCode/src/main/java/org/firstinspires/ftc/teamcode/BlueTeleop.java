@@ -185,17 +185,17 @@ public class BlueTeleop extends LinearOpMode
             }
             if(gamepad2.dpad_right && !lastFrameDpadRight2)
             {
-                odometry.perpDistance += 0.1;
+                //odometry.perpDistance += 0.1;
                 //manualPosOffset += 10;
                 lastFrameDpadRight2 = true;
             }
             if(gamepad2.dpad_left && !lastFrameDpadLeft2)
             {
-                odometry.perpDistance -= 0.1;
+                //odometry.perpDistance -= 0.1;
                 //manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
-            telemetry.addData("perpDistance", odometry.perpDistance);
+            //telemetry.addData("perpDistance", odometry.perpDistance);
             telemetry.addData("parallelOffset", odometry.parallelOffset);
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
