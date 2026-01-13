@@ -50,8 +50,8 @@ public class turnTest extends LinearOpMode {
             deltaCenterX = ((cmLeft + cmRight) / 2);
             deltaCenterY = (cmPerp - (perpDistance * currentAngle));
 
-            currentX = x0 + (deltaCenterX * Math.cos(currentAngle)) - (deltaCenterY * Math.sin(currentAngle));
-            currentY = y0 + (deltaCenterX * Math.sin(currentAngle)) + (deltaCenterY * Math.cos(currentAngle));
+            currentX = x0 + (deltaCenterX * Math.cos(Math.toRadians(currentAngle))) - (deltaCenterY * Math.sin(Math.toRadians(currentAngle)));
+            currentY = y0 + (deltaCenterX * Math.sin(Math.toRadians(currentAngle))) + (deltaCenterY * Math.cos(Math.toRadians(currentAngle)));
 
             //telemetry.addData("\noriginal angle", angle0);
             telemetry.addData("delta angle", currentAngle);
