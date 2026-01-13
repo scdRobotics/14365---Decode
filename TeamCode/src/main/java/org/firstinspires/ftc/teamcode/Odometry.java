@@ -17,12 +17,24 @@ public class Odometry {
     DcMotorEx perpDeadwheel;
 
     // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
-    final static double deadwheelDistance = 34.798; //cm; distance between deadwheels //13.875in
-    final static double perpDistance = -17.78; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
+    static double deadwheelDistance = 87.0966; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
+    static double perpDistance = -7.77875; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
+    static double parallelOffset = 6.985;
+    /*
+    -.3 --> -7.452y
+    0 --> 24y
+    +0.2 --> 20y
+    +1 --> -18y
+    +.4 --> 13y
+    +.3 --> 10y
+    */
 
 
+    //7.785 --> 2.3769
     final static double ticksPerRev = -2000; //-2003.5
     final static double deadwheelRadius = 1.6; //cm
+
+    final static double deadwheelCircumference = 10.048;
 
     String color;
 
@@ -95,31 +107,54 @@ public class Odometry {
     double currentX; //cm
     double currentY; //cm
 
-    public void update()
-    {
-        cmLeft = (double)leftDeadwheel.getCurrentPosition() / ticksPerRev  * 2 * Math.PI * deadwheelRadius;
-        cmRight = (double)rightDeadwheel.getCurrentPosition() / ticksPerRev * 2 * Math.PI * deadwheelRadius;
-        cmPerp = (double)perpDeadwheel.getCurrentPosition() / ticksPerRev * 2 * Math.PI * deadwheelRadius;
-        currentAngle = angle0 + ((cmLeft - cmRight) / deadwheelDistance);
-        currentAngle %= 2 * Math.PI;
+    double lastFrameAngle = 0;
 
-        deltaCenterX = ((cmLeft + cmRight) / 2);
-        deltaCenterY = (cmPerp + (perpDistance * currentAngle));
+    double lastCmLeft, lastCmRight, lastCmPerp;
 
+    public void update() {
 
-        currentX = x0 + (deltaCenterX * Math.cos(Math.toRadians(currentAngle))) - (deltaCenterY * Math.sin(Math.toRadians(currentAngle)));
-        currentY = y0 + (deltaCenterX * Math.sin(Math.toRadians(currentAngle))) + (deltaCenterY * Math.cos(Math.toRadians(currentAngle)));
+        // --- Read encoders (absolute) ---
+        double leftPos = leftDeadwheel.getCurrentPosition();
+        double rightPos = rightDeadwheel.getCurrentPosition();
+        double perpPos = perpDeadwheel.getCurrentPosition();
 
-        //telemetry.addData("\noriginal angle", angle0);
-        telemetry.addData("delta angle", currentAngle);
+        // --- Convert ticks to distance ---
+        double cmLeft = leftPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+        double cmRight = rightPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+        double cmPerp = perpPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
 
-        telemetry.addData("\nx", currentX);
-        telemetry.addData("y", currentY);
-        telemetry.addData("deltaCenterX", deltaCenterX);
-        telemetry.addData("deltaCenterY", deltaCenterY);
-        telemetry.addData("currentAngle", Math.toDegrees(currentAngle));
+        // --- Delta distances ---
+        double dL = cmLeft - lastCmLeft;
+        double dR = cmRight - lastCmRight;
+        double dC = cmPerp - lastCmPerp;
 
-        telemetry.update();
+        lastCmLeft = cmLeft;
+        lastCmRight = cmRight;
+        lastCmPerp = cmPerp;
+
+        // --- Delta heading ---
+        double dTheta = (dR - dL) / deadwheelDistance;
+
+        // --- Robot-relative motion (CORRECTED) ---
+        double dForward = ((dL + dR) / 2.0) - (parallelOffset * dTheta);
+        double dStrafe  = dC - (perpDistance * dTheta);
+
+        // --- Rotate into field frame ---
+        double midHeading = currentAngle + dTheta / 2.0;
+
+        double cos = Math.cos(midHeading);
+        double sin = Math.sin(midHeading);
+
+        currentX += dStrafe * cos - dForward * sin;
+        currentY += dStrafe * sin + dForward * cos;
+        currentAngle += dTheta;
+
+        // Normalize heading
+        currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        telemetry.addData("X", currentX);
+        telemetry.addData("Y", currentY);
+        telemetry.addData("Heading (deg)", Math.toDegrees(currentAngle));
     }
     public void odometryTelemetry()
     {
@@ -135,9 +170,9 @@ public class Odometry {
         telemetry.addData("deltaCenterX", deltaCenterX);
         telemetry.addData("deltaCenterY", deltaCenterY);
         telemetry.addData("currentAngle", Math.toDegrees(currentAngle));
-
         telemetry.addData("left deadwheel", leftDeadwheel.getCurrentPosition());
         telemetry.addData("right deadwheel", rightDeadwheel.getCurrentPosition());
+        telemetry.addData("perpendicular deadwheel", perpDeadwheel.getCurrentPosition());
     }
     public double getAngle()
     {
@@ -158,6 +193,16 @@ public class Odometry {
     public double getY()
     {
         return currentY;
+    }
+
+    public double getInchesFromMotorTicks(double motorTicks)
+    {
+        return (motorTicks/2000*deadwheelCircumference)/2.54;
+    }
+
+    public double getCmFromMotorTicks(double motorTicks)
+    {
+        return getInchesFromMotorTicks(motorTicks)*2.54;
     }
 
     public double getDistToGoal()

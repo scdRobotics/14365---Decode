@@ -35,7 +35,7 @@ public class BlueTeleop extends LinearOpMode
         intake.openTopServo(false);
         Lifting lift = new Lifting(hardwareMap, telemetry);
 
-        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue", true, new Pose(0, 0, Math.PI));
+        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue", true, new Pose(0, 0, 0));
 
         float power = 1;
         boolean lastFrameDPad = false;
@@ -90,7 +90,7 @@ public class BlueTeleop extends LinearOpMode
         while (opModeIsActive())
         {
             odometry.update();
-            odometry.odometryTelemetry();
+            //odometry.odometryTelemetry();
 
             center = aprilTagDetection.telemetryAprilTag();
 
@@ -173,24 +173,30 @@ public class BlueTeleop extends LinearOpMode
 
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
             {
-                manualPowerOffset += 25;
+                odometry.parallelOffset += 0.1;
+                //manualPowerOffset += 25;
                 lastFrameDpadUp2 = true;
             }
             if(gamepad2.dpad_down && !lastFrameDpadDown2)
             {
-                manualPowerOffset -= 25;
+                odometry.parallelOffset -= 0.1;
+                //manualPowerOffset -= 25;
                 lastFrameDpadDown2 = true;
             }
             if(gamepad2.dpad_right && !lastFrameDpadRight2)
             {
-                manualPosOffset += 10;
+                odometry.perpDistance += 0.1;
+                //manualPosOffset += 10;
                 lastFrameDpadRight2 = true;
             }
             if(gamepad2.dpad_left && !lastFrameDpadLeft2)
             {
-                manualPosOffset -= 10;
+                odometry.perpDistance -= 0.1;
+                //manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
+            telemetry.addData("perpDistance", odometry.perpDistance);
+            telemetry.addData("parallelOffset", odometry.parallelOffset);
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {
