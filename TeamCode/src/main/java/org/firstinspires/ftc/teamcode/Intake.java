@@ -140,13 +140,6 @@ public class Intake extends LinearOpMode
         {
             shooting = true;
         }
-        if(!isBallInChamber())
-        {
-            shooting = false;
-            shootMotor.setVelocity(0);
-
-            loading = true;
-        }
         if(shooting && isAtVelo(power))
         {
             loading = true;
