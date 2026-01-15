@@ -6,6 +6,7 @@ public class TopBlueAuto extends LinearOpMode {
     public void runOpMode()
     {
         RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
+        rc.odometry.setPose(Odometry.topBlueStart);
         waitForStart();
 
         rc.shoot3(1700);

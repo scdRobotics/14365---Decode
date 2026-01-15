@@ -7,6 +7,7 @@ public class BottomBlueAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
+        rc.odometry.setPose(rc.odometry.bottomBlueStart);
 
         waitForStart();
 

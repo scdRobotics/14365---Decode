@@ -11,6 +11,8 @@ public class Pose extends Point {
     public Pose(double x, double y, double angle)
     {
         super(x, y);
+        //just in case
+        if(Math.abs(angle) > 2 * Math.PI) angle = Math.toRadians(angle);
         this.angle = angle;
     }
 

@@ -17,29 +17,28 @@ public class Odometry {
     DcMotorEx perpDeadwheel;
 
     // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
-    static double deadwheelDistance = 34.3; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
+    static double deadwheelDistance = 35; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
     static double perpDistance = -7.77875; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
     static double parallelOffset = 6.985;
-    /*
-    -.3 --> -7.452y
-    0 --> 24y
-    +0.2 --> 20y
-    +1 --> -18y
-    +.4 --> 13y
-    +.3 --> 10y
-    */
 
+    //red human player zone (22.5, 22.5, 0)
+    //blue human player zone(343.26,22.5, 0)
 
-    //7.785 --> 2.3769
+    static final public Pose blueHumanPlayer = new Pose(343.26, 22.5, 0);
+    static final public Pose redHumanPlayer = new Pose(22.5, 22.5, 0);
+    static final public Point redGoalPosition = new Pose(365.76, 365.76);
+    static final public Point blueGoalPosition = new Pose(0, 365.76);
+    static final public Pose topBlueStart = new Pose(142.5, 22.5, 0);
+    static final public Pose topRedStart = new Pose(223.26, 22.5, 0);
+    static final public Pose bottomBlueStart = new Pose(38.9247, 308.3108, -0.75705983410735577799);
+    static final public Pose bottomRedStart = new Pose(308.1273, 318.3225, 0.75705983410735577799);
+
     final static double ticksPerRev = -2000; //-2003.5
     final static double deadwheelRadius = 1.6; //cm
 
     final static double deadwheelCircumference = 10.048;
 
     String color;
-
-    private static final Point blueGoalPosition = new Point(365.76, 0);
-    private static final Point redGoalPosition = new Point(365.76, 365.76);
 
 
     DcMotor frontLeftMotor;
@@ -104,8 +103,8 @@ public class Odometry {
 
     double deltaCenterX;
     double deltaCenterY;
-    double currentX; //cm
-    double currentY; //cm
+    static double currentX; //cm
+    static double currentY; //cm
 
     double lastFrameAngle = 0;
 
@@ -146,8 +145,23 @@ public class Odometry {
         double sin = Math.sin(midHeading);
 
         currentX += dStrafe * cos - dForward * sin;
-        currentY += dStrafe * sin + dForward * cos;
+        currentY -= dStrafe * sin + dForward * cos;
         currentAngle += dTheta;
+
+
+        boolean isNeg;
+        if(currentAngle < 0)
+        {
+            isNeg = true;
+            currentAngle -= Math.PI;
+        }
+        else {
+            isNeg = false;
+            currentAngle += Math.PI;
+        }
+        currentAngle %= 2*Math.PI;
+        if(isNeg) currentAngle += Math.PI;
+        else currentAngle -= Math.PI;
 
         // Normalize heading
         //currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
@@ -174,6 +188,10 @@ public class Odometry {
         telemetry.addData("left deadwheel", leftDeadwheel.getCurrentPosition());
         telemetry.addData("right deadwheel", rightDeadwheel.getCurrentPosition());
         telemetry.addData("perpendicular deadwheel", perpDeadwheel.getCurrentPosition());
+    }
+    public void telemetry()
+    {
+
     }
     public double getAngle()
     {
@@ -226,43 +244,72 @@ public class Odometry {
     {
         if(color.equals("blue"))
         {
-            double a = blueGoalPosition.x - getX(); //adjacent / height
-            double b = blueGoalPosition.y - getY(); //opposite / base
+            double x = blueGoalPosition.x - getX(); //adjacent / height
+            double y = blueGoalPosition.y - getY(); //opposite / base
 
-            return Math.atan(b/a);
+            return Math.atan(x/y);
         }
         if(color.equals("red"))
         {
-            double a = redGoalPosition.x - getX(); //adjacent / height
-            double b = redGoalPosition.y - getY(); //opposite / base
+            double x = redGoalPosition.x - getX(); //adjacent / height
+            double y = redGoalPosition.y - getY(); //opposite / base
 
-            return Math.atan(b/a);
+            return Math.atan(x/y);
         }
         return -404;
     }
+
+
+    public void setPose(Pose pose)
+    {
+        currentX = pose.x;
+        currentY = pose.y;
+        currentAngle = pose.angle;
+    }
+    public double getPower()
+    {
+        //y=-0.00303763x^{3}+3.41269x^{2}-1274.7416x+160066.513
+        double x = this.getDistToGoal();
+        if(x < 358) return 1725;
+        if(x > 395) return 1800;
+        return (-0.00303763*Math.pow(x,3)) + (3.41269*Math.pow(x,2)) - (1274.7416*x) + (160066.513);
+    }
+
     public void turnToAngle(double angle, float power)
     {
-        double distMult = 0.3;
-        while(getAngle() < angle)
-        {
-            this.update();
-            double dist = Math.abs(getAngle()-angle);
-            double p = power * Math.min(1, dist*distMult);
-            frontLeftMotor.setPower(p);
-            backLeftMotor.setPower(p);
-            frontRightMotor.setPower(-p);
-            backRightMotor.setPower(-p);
-        }
+        double distMult = 1;
 
-        while(getAngle() > angle)
+        if(getAngle() > angle)
         {
-            this.update();
-            double dist = Math.abs(getAngle()-angle);
-            double p = power * Math.min(1, dist*distMult);
-            frontLeftMotor.setPower(-p);
-            backLeftMotor.setPower(-p);
-            frontRightMotor.setPower(p);
-            backRightMotor.setPower(p);
+            while(getAngle() > angle)
+            {
+                this.update();
+                double dist = Math.abs(getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                frontLeftMotor.setPower(p);
+                backLeftMotor.setPower(p);
+                frontRightMotor.setPower(-p);
+                backRightMotor.setPower(-p);
+                telemetry.addData("power", p);
+                telemetry.update();
+            }
+        }
+        else
+        {
+            while(getAngle() < angle)
+            {
+                this.update();
+                double dist = Math.abs(getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                frontLeftMotor.setPower(-p);
+                backLeftMotor.setPower(-p);
+                frontRightMotor.setPower(p);
+                backRightMotor.setPower(p);
+                telemetry.addData("power", p);
+                telemetry.update();
+            }
         }
     }
 }
