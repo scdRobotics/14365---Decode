@@ -42,8 +42,8 @@ public class RobotController {
         this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, color);
         this.aprilTagDetection.initAprilTag();
 
-        this.intake.servoBottom.setPosition(0.5);
-        this.intake.servoTop.setPosition(0.75);
+        this.intake.servoBottom.setPosition(intake.bottomClosePos);
+        this.intake.servoTop.setPosition(intake.topClosePos);
 
         this.imu = hardwareMap.get(IMU.class, "imu");
 
@@ -77,7 +77,10 @@ public class RobotController {
             motor.setPower(power);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
-        while(motorsAreBusy());
+        while(motorsAreBusy())
+        {
+            odometry.update();
+        };
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
@@ -93,7 +96,10 @@ public class RobotController {
             motor.setPower(power);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
-        while(motorsAreBusy());
+        while(motorsAreBusy())
+        {
+            odometry.update();
+        };
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
@@ -119,7 +125,10 @@ public class RobotController {
         motors.get(3).setPower(power);
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        while(motorsAreBusy());
+        while(motorsAreBusy())
+        {
+            odometry.update();
+        };
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
@@ -144,7 +153,10 @@ public class RobotController {
         motors.get(3).setTargetPosition(ticks);
         motors.get(3).setPower(power);
         motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while(motorsAreBusy());
+        while(motorsAreBusy())
+        {
+            odometry.update();
+        };
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
@@ -169,6 +181,8 @@ public class RobotController {
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(3).setPower(power/i);
+
+                odometry.update();
             }
 
             while (imu.getRobotYawPitchRollAngles().getYaw() > angle)
@@ -184,6 +198,8 @@ public class RobotController {
 
                 motors.get(3).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 motors.get(3).setPower(-power/i);
+
+                odometry.update();
             }
 
             for (DcMotor motor : motors)
@@ -199,7 +215,7 @@ public class RobotController {
     }
     public void shoot3(float power)
     {
-        intake.shoot3(power);
+        intake.shoot3Auto(power);
     }
     public void shoot(float power)
     {
@@ -242,6 +258,58 @@ public class RobotController {
     public double getYaw()
     {
         return imu.getRobotYawPitchRollAngles().getYaw() - angleOffset;
+    }
+    public void turnToAngle(double angle, float power)
+    {
+        double distMult = 1;
+        telemetry.addData("turn to angle", angle);
+        telemetry.update();
+
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if(odometry.getAngle() > angle)
+        {
+            while(odometry.getAngle() > angle)
+            {
+                odometry.update();
+                double dist = Math.abs(odometry.getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                frontLeftMotor.setPower(p);
+                backLeftMotor.setPower(p);
+                frontRightMotor.setPower(-p);
+                backRightMotor.setPower(-p);
+                telemetry.addData("power to turn at", p);
+                telemetry.addData("currentAngle", odometry.getAngle());
+                telemetry.addData("wanted angle", angle);
+                telemetry.update();
+            }
+        }
+        else
+        {
+            while(odometry.getAngle() < angle)
+            {
+                odometry.update();
+                double dist = Math.abs(odometry.getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                frontLeftMotor.setPower(-p);
+                backLeftMotor.setPower(-p);
+                frontRightMotor.setPower(p);
+                backRightMotor.setPower(p);
+                telemetry.addData("power to turn at", p);
+                telemetry.addData("currentAngle", odometry.getAngle());
+                telemetry.addData("wanted angle", angle);
+                telemetry.update();
+            }
+        }
+        frontRightMotor.setPower(0);
+        frontLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
     }
 
     public void turnToAngle(float angle, float power)

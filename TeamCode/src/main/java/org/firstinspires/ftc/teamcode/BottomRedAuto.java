@@ -11,13 +11,13 @@ public class BottomRedAuto extends LinearOpMode {
 
         waitForStart();
 
-        rc.moveBackward(45, 0.4f);
+        rc.moveBackward(48, 0.4f);
         rc.moveRight(6,0.2f);
         rc.moveBackward(8,0.4f);
         rc.turnToCenterGoal(0.4f, 3, -100);
         telemetry.addData("velo to shoot at", rc.getPow());
         telemetry.update();
-        rc.shoot3(rc.getPow());
-        rc.moveRight(15, 0.5f);
+        rc.shoot3(1350);
+        rc.moveRight(12, 0.5f);
     }
 }

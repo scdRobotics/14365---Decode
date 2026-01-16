@@ -23,6 +23,10 @@ public class RedTeleop extends LinearOpMode
     /**
      * The variable to store our instance of the vision portal.
      */
+<<<<<<< Updated upstream
+=======
+    int manualPowerOffset = -50;
+>>>>>>> Stashed changes
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -137,7 +141,20 @@ public class RedTeleop extends LinearOpMode
             //turn to goal
             if(gamepad2.a && aprilTagDetection.getDistance() > 0)
             {
+<<<<<<< Updated upstream
                 aprilTagDetection.turnToCenterGoal(motors, .4f, 3, -160 + manualPosOffset);
+=======
+                //aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                //odometry.turnToAngle(0, 1);
+                odometry.turnToAngle(odometry.getAngleToGoal(), 1);
+            }
+            if(gamepad2.y)
+            {
+                //reset the position values
+                Odometry.x0 = 0;
+                Odometry.y0 = 0;
+                Odometry.angle0 = 0;
+>>>>>>> Stashed changes
             }
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
             {
@@ -159,7 +176,21 @@ public class RedTeleop extends LinearOpMode
                 manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
+<<<<<<< Updated upstream
             else intake.shootMotor.setPower(0);
+=======
+
+            if(gamepad1.a)
+            {
+                odometry.setPose(odometry.redHumanPlayer);
+            }
+            if(gamepad1.b)
+            {
+                odometry.setPose(new Pose(odometry.currentX, odometry.currentY, 0));
+            }
+            if(gamepad1.x) odometry.setPose(odometry.topBlueStart);
+            if(gamepad1.y) odometry.setPose(odometry.bottomBlueStart);
+>>>>>>> Stashed changes
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {

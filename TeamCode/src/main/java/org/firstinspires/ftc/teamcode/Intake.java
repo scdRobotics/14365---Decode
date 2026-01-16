@@ -29,8 +29,8 @@ public class Intake extends LinearOpMode
 
      DcMotorEx shootMotor;
     Servo servoBottom, servoTop;
-    final float bottomClosePos = 0.45f;
-    final float bottomOpenPos = 0.55f;
+    final float bottomClosePos = 0.40f;
+    final float bottomOpenPos = 0.50f;
     final float topClosePos = 0.7f;
     final float topOpenPos = 0.9f;
     //dist, power
@@ -157,6 +157,15 @@ public class Intake extends LinearOpMode
         }
         if(numShot == 4) return;
     }
+    public void shoot3Auto(float power) {
+        shootMotor.setVelocity(-power);
+        waitForVelo(power);
+        loadNextBallAuto();
+        waitForVelo(power);
+        loadNextBallAuto();
+        waitForVelo(power);
+        loadNextBallAuto();
+    }
 
     long time = 0;
     long startTime = 0;
@@ -203,9 +212,23 @@ public class Intake extends LinearOpMode
 
         loading = false;*/
     }
+    void loadNextBallAuto()
+    {
+        openBottomServo(true);
+        //wait less than second
+        sleepTime(500);
+        //close servoBottom
+        openBottomServo(false);
+        sleepTime(75);
+        dropBall();
+    }
     void dropBall()
     {
-
+        openTopServo(true);
+        //wait <second
+        sleepTime(500);
+        //close servoTop
+        openTopServo(false);
     }
     private void waitForVelo(float power)
     {

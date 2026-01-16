@@ -6,9 +6,16 @@ public class TopBlueAuto extends LinearOpMode {
     public void runOpMode()
     {
         RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
+<<<<<<< Updated upstream
+=======
+        //Odometry odometry = new Odometry(hardwareMap, telemetry, "blue");
+        rc.odometry.setPose(Odometry.topBlueStart);
+        telemetry.addData("pose", "(" + rc.odometry.getPose().x + ", " + rc.odometry.getPose().y + ", " + rc.odometry.getPose().angle + ")");
+        telemetry.addData("angle to goal", rc.odometry.getAngleToGoal());
+        telemetry.update();
+>>>>>>> Stashed changes
         waitForStart();
-
-        rc.shoot3(1700);
+        rc.shoot3(1650);
         rc.intake.shootMotor.setVelocity(0);
         rc.moveForward(20, 0.4f);
     }

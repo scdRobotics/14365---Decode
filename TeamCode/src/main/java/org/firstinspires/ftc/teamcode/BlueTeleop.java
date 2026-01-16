@@ -23,7 +23,7 @@ public class BlueTeleop extends LinearOpMode
     /**
      * The variable to store our instance of the vision portal.
      */
-    int manualPowerOffset = 0;
+    int manualPowerOffset = -50;
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -91,7 +91,11 @@ public class BlueTeleop extends LinearOpMode
         while (opModeIsActive())
         {
             odometry.update();
+<<<<<<< Updated upstream
             odometry.odometryTelemetry();
+=======
+            //intake.shootMotor.setVelocity(-odometry.getPower());
+>>>>>>> Stashed changes
 
             center = aprilTagDetection.telemetryAprilTag();
 
@@ -120,11 +124,15 @@ public class BlueTeleop extends LinearOpMode
             //normal shooting
             if(gamepad2.right_trigger != 0)
             {
+<<<<<<< Updated upstream
                 if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
                 else
                 {
                     veloToShoot = intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
                 }
+=======
+                veloToShoot = odometry.getPower()+manualPowerOffset;//intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
+>>>>>>> Stashed changes
             }
             if(veloToShoot != 0)
             {
@@ -183,6 +191,14 @@ public class BlueTeleop extends LinearOpMode
                 manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
+<<<<<<< Updated upstream
+=======
+
+            if(gamepad1.a)
+            {
+                odometry.setPose(odometry.blueHumanPlayer);
+            }
+>>>>>>> Stashed changes
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {

@@ -14,7 +14,7 @@ public class BottomBlueAuto extends LinearOpMode {
         rc.moveLeft(6,0.2f);
         rc.moveBackward(8,0.4f);
         rc.turnToCenterGoal(0.4f, 3);
-        rc.shoot3(rc.getPow());
-        rc.moveLeft(6, 0.5f);
+        rc.shoot3(1400);
+        rc.moveLeft(12, 0.5f);
     }
 }

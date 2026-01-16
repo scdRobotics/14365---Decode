@@ -31,6 +31,18 @@ public class Odometry {
     {
         this.telemetry = telemetry;
 
+<<<<<<< Updated upstream
+=======
+        this.frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
+        this.backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
+        this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
+        this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+
+        telemetry.addLine("Odometry Initilized!");
+
+        this.motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
+
+>>>>>>> Stashed changes
         this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "leftSlide"); //left tick/rev = -2002.6 (forward)
         this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "rightSlide"); //right tick/rev = -2004.4 (forward)
         this.perpDeadwheel = hardwareMap.get(DcMotorEx.class, "perpendicularOdo");
@@ -92,8 +104,64 @@ public class Odometry {
         deltaCenterX = ((cmLeft + cmRight) / 2);
         deltaCenterY = (cmPerp - (perpDistance * currentAngle));
 
+<<<<<<< Updated upstream
         currentX = x0 + (deltaCenterX * Math.cos(Math.toRadians(currentAngle))) - (deltaCenterY * Math.sin(Math.toRadians(currentAngle)));
         currentY = y0 + (deltaCenterX * Math.sin(Math.toRadians(currentAngle))) + (deltaCenterY * Math.cos(Math.toRadians(currentAngle)));
+=======
+        // --- Read encoders (absolute) ---
+        double leftPos = leftDeadwheel.getCurrentPosition();
+        double rightPos = rightDeadwheel.getCurrentPosition();
+        double perpPos = perpDeadwheel.getCurrentPosition();
+
+        // --- Convert ticks to distance ---
+        double cmLeft = leftPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+        double cmRight = rightPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+        double cmPerp = perpPos / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+
+        // --- Delta distances ---
+        double dL = cmLeft - lastCmLeft;
+        double dR = cmRight - lastCmRight;
+        double dC = cmPerp - lastCmPerp;
+
+        lastCmLeft = cmLeft;
+        lastCmRight = cmRight;
+        lastCmPerp = cmPerp;
+
+        // --- Delta heading ---
+        double dTheta = (dR - dL) / deadwheelDistance;
+
+        // --- Robot-relative motion (CORRECTED) ---
+        double dForward = ((dL + dR) / 2.0) - (parallelOffset * dTheta);
+        double dStrafe  = dC - (perpDistance * dTheta);
+
+        // --- Rotate into field frame ---
+        double midHeading = currentAngle + dTheta / 2.0;
+
+        double cos = Math.cos(midHeading);
+        double sin = Math.sin(midHeading);
+
+        currentX += dStrafe * cos - dForward * sin;
+        currentY -= dStrafe * sin + dForward * cos;
+        currentAngle += dTheta;
+
+
+        boolean isNeg;
+        if(currentAngle < 0)
+        {
+            isNeg = true;
+            currentAngle -= Math.PI;
+        }
+        else {
+            isNeg = false;
+            currentAngle += Math.PI;
+        }
+        currentAngle %= 2*Math.PI;
+        if(isNeg) currentAngle += Math.PI;
+        else currentAngle -= Math.PI;
+
+        // Normalize heading
+        //currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
+>>>>>>> Stashed changes
     }
     public void odometryTelemetry()
     {
@@ -126,7 +194,7 @@ public class Odometry {
     }
     public Pose getPose()
     {
-        return new Pose(currentX, currentY, currentAngle);
+        return new Pose(getX(), getY(), getAngle());
     }
     public double getX()
     {
@@ -171,4 +239,74 @@ public class Odometry {
         }
         return -404;
     }
+<<<<<<< Updated upstream
+=======
+
+
+    public void setPose(Pose pose)
+    {
+        currentX = pose.x;
+        currentY = pose.y;
+        currentAngle = pose.angle;
+    }
+    public double getPower()
+    {
+        //y=-0.00303763x^{3}+3.41269x^{2}-1274.7416x+160066.513
+        double x = this.getDistToGoal();
+        if(x < 300) return 0.000047338*Math.pow(x, 3) - 0.0246386*Math.pow(x,2) + 4.50147*x + 1110.05994;//y=0.000047338x^{3}-0.0246386x^{2}+4.50147x+1110.05994
+        if(x < 358) return 1725;
+        if(x > 395) return 1800;
+        return (-0.00303763*Math.pow(x,3)) + (3.41269*Math.pow(x,2)) - (1274.7416*x) + (160066.513);
+    }
+
+    public void turnToAngle(double angle, float power)
+    {
+        double distMult = 1;
+        telemetry.addData("turn to angle", angle);
+        telemetry.update();
+
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if(getAngle() > angle)
+        {
+            while(getAngle() > angle)
+            {
+                this.update();
+                double dist = Math.abs(getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                this.frontLeftMotor.setPower(p);
+                this.backLeftMotor.setPower(p);
+                this.frontRightMotor.setPower(-p);
+                this.backRightMotor.setPower(-p);
+                telemetry.addData("power to turn at", p);
+                telemetry.update();
+            }
+        }
+        else
+        {
+            while(getAngle() < angle)
+            {
+                this.update();
+                double dist = Math.abs(getAngle()-angle);
+                double p = power * Math.min(1, dist*distMult);
+                p = Math.max(0.3,p);
+                this.frontLeftMotor.setPower(-p);
+                this.backLeftMotor.setPower(-p);
+                this.frontRightMotor.setPower(p);
+                this.backRightMotor.setPower(p);
+                telemetry.addData("power to turn at", p);
+                telemetry.update();
+            }
+        }
+
+        frontRightMotor.setPower(0);
+        frontLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+    }
+>>>>>>> Stashed changes
 }
