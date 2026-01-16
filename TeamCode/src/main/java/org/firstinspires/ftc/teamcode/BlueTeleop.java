@@ -91,11 +91,8 @@ public class BlueTeleop extends LinearOpMode
         while (opModeIsActive())
         {
             odometry.update();
-<<<<<<< Updated upstream
             odometry.odometryTelemetry();
-=======
             //intake.shootMotor.setVelocity(-odometry.getPower());
->>>>>>> Stashed changes
 
             center = aprilTagDetection.telemetryAprilTag();
 
@@ -124,15 +121,12 @@ public class BlueTeleop extends LinearOpMode
             //normal shooting
             if(gamepad2.right_trigger != 0)
             {
-<<<<<<< Updated upstream
-                if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
+                /*if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
                 else
                 {
                     veloToShoot = intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
-                }
-=======
-                veloToShoot = odometry.getPower()+manualPowerOffset;//intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
->>>>>>> Stashed changes
+                }*/
+                veloToShoot = (float)odometry.getPower()+manualPowerOffset;//intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
             }
             if(veloToShoot != 0)
             {
@@ -149,7 +143,8 @@ public class BlueTeleop extends LinearOpMode
             //shoot 1
             if(gamepad2.x)
             {
-                intake.shoot(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
+                //intake.shoot(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
+                intake.shoot((float)odometry.getPower());
             }
             //toggle start up shoot motor
             if(gamepad2.left_trigger != 0 && !lastFrameLeftTrigger2)
@@ -157,7 +152,7 @@ public class BlueTeleop extends LinearOpMode
                 spinUpShootMotor = !spinUpShootMotor;
                 lastFrameLeftTrigger2 = true;
             }
-            if(spinUpShootMotor) intake.shootMotor.setVelocity(-1000);
+            //if(spinUpShootMotor) intake.shootMotor.setVelocity(-1000);
             //toggle top servo
             if(gamepad2.right_bumper && !lastFrameRightBumper2)
             {
@@ -166,9 +161,10 @@ public class BlueTeleop extends LinearOpMode
                 lastFrameRightBumper2 = true;
             }
             //turn to goal
-            if(gamepad2.a && aprilTagDetection.getDistance() > 0)
+            if(gamepad2.a /*&& aprilTagDetection.getDistance() > 0*/)
             {
-                aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                //aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
+                odometry.turnToAngle(odometry.getAngleToGoal(), 1);
             }
 
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
@@ -191,14 +187,11 @@ public class BlueTeleop extends LinearOpMode
                 manualPosOffset -= 10;
                 lastFrameDpadLeft2 = true;
             }
-<<<<<<< Updated upstream
-=======
 
             if(gamepad1.a)
             {
                 odometry.setPose(odometry.blueHumanPlayer);
             }
->>>>>>> Stashed changes
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {
@@ -209,15 +202,16 @@ public class BlueTeleop extends LinearOpMode
 
 
 
-            if(aprilTagDetection.getDistance() < 0)
+            /*if(aprilTagDetection.getDistance() < 0)
             {
                 telemetry.addLine("|||||||| CANNOT FIND APRIL TAG!!! ||||||||");
             }
-            else telemetry.addData("aprilTag distance", aprilTagDetection.getDistance());
+            else telemetry.addData("aprilTag distance", aprilTagDetection.getDistance());*/
 
-            telemetry.addData("aprilTag X", center.x);
+            //telemetry.addData("aprilTag X", center.x);
             telemetry.addData("-------> manual power offset", manualPowerOffset);
             telemetry.addData("-------> manual turn offset", manualPosOffset);
+            telemetry.addData("odo pose", odometry.getPose());
 
             lastFrameRight = gamepad1.dpad_right;
             lastFrameLeft = gamepad1.dpad_left;
@@ -234,10 +228,5 @@ public class BlueTeleop extends LinearOpMode
 
             telemetry.update();
         }
-
-    }
-    float getManualOffset()
-    {
-        return manualPowerOffset;
     }
 }

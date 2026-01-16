@@ -6,13 +6,6 @@ public class TopRedAuto extends LinearOpMode {
     public void runOpMode()
     {
         RobotController rc = new RobotController(hardwareMap, telemetry, "red");
-<<<<<<< Updated upstream
-
-        waitForStart();
-=======
-        //Odometry odometry = new Odometry(hardwareMap, telemetry, "blue");
-        rc.odometry.setPose(Odometry.topRedStart);
->>>>>>> Stashed changes
 
         waitForStart();
         rc.shoot3(1700);

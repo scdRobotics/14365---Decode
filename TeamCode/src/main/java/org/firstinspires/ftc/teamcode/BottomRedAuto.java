@@ -15,8 +15,8 @@ public class BottomRedAuto extends LinearOpMode {
         rc.moveRight(6,0.2f);
         rc.moveBackward(8,0.4f);
         rc.turnToCenterGoal(0.4f, 3, -100);
-        telemetry.addData("velo to shoot at", rc.getPow());
-        telemetry.update();
+        /*telemetry.addData("velo to shoot at", rc.getPow());
+        telemetry.update();*/
         rc.shoot3(1350);
         rc.moveRight(12, 0.5f);
     }

@@ -7,16 +7,22 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import java.util.List;
+
 public class Odometry {
     Telemetry telemetry;
     DcMotorEx leftDeadwheel;
     DcMotorEx rightDeadwheel;
     DcMotorEx perpDeadwheel;
 
+    DcMotor frontLeftMotor, frontRightMotor, backRightMotor, backLeftMotor;
+    List<DcMotor> motors;
+
 
     // CHANGE YEAR TO YEAR
     final static double deadwheelDistance = 35.25; //cm; distance between deadwheels //13.875in
     final static double perpDistance = 17.78; //cm
+    final static double parallelOffset = 9.5; //help :(
 
 
     final static double ticksPerRev = -2003.5;
@@ -24,15 +30,15 @@ public class Odometry {
 
     String color;
 
-    private static final Point blueGoalPosition = new Point(340, 22);
-    private static final Point redGoalPosition = new Point(340, 320);
+    public static final Point blueGoalPosition = new Pose(365.75, 0);
+    public static final Point redGoalPosition = new Pose(365.75, 365.75);
+    public static final Pose redHumanPlayer = new Pose(22.5, 22.5);
+    public static final Pose blueHumanPlayer = new Pose(343.25, 22.5);
 
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color, boolean isAuto)
     {
         this.telemetry = telemetry;
 
-<<<<<<< Updated upstream
-=======
         this.frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         this.backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
@@ -42,7 +48,6 @@ public class Odometry {
 
         this.motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
->>>>>>> Stashed changes
         this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "leftSlide"); //left tick/rev = -2002.6 (forward)
         this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "rightSlide"); //right tick/rev = -2004.4 (forward)
         this.perpDeadwheel = hardwareMap.get(DcMotorEx.class, "perpendicularOdo");
@@ -90,6 +95,10 @@ public class Odometry {
     double currentX; //cm
     double currentY; //cm
 
+    double lastCmRight;
+    double lastCmLeft;
+    double lastCmPerp;
+
     public void update()
     {
         //field 365.75cm x 365.75cm
@@ -104,10 +113,9 @@ public class Odometry {
         deltaCenterX = ((cmLeft + cmRight) / 2);
         deltaCenterY = (cmPerp - (perpDistance * currentAngle));
 
-<<<<<<< Updated upstream
         currentX = x0 + (deltaCenterX * Math.cos(Math.toRadians(currentAngle))) - (deltaCenterY * Math.sin(Math.toRadians(currentAngle)));
         currentY = y0 + (deltaCenterX * Math.sin(Math.toRadians(currentAngle))) + (deltaCenterY * Math.cos(Math.toRadians(currentAngle)));
-=======
+
         // --- Read encoders (absolute) ---
         double leftPos = leftDeadwheel.getCurrentPosition();
         double rightPos = rightDeadwheel.getCurrentPosition();
@@ -161,7 +169,6 @@ public class Odometry {
 
         // Normalize heading
         //currentAngle = (currentAngle + Math.PI) % (2 * Math.PI) - Math.PI;
->>>>>>> Stashed changes
     }
     public void odometryTelemetry()
     {
@@ -239,9 +246,6 @@ public class Odometry {
         }
         return -404;
     }
-<<<<<<< Updated upstream
-=======
-
 
     public void setPose(Pose pose)
     {
@@ -308,5 +312,4 @@ public class Odometry {
         backRightMotor.setPower(0);
         backLeftMotor.setPower(0);
     }
->>>>>>> Stashed changes
 }
