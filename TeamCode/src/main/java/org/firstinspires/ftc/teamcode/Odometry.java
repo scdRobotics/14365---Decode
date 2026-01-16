@@ -1,7 +1,9 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,25 +17,36 @@ public class Odometry {
     DcMotorEx rightDeadwheel;
     DcMotorEx perpDeadwheel;
 
-    DcMotor frontLeftMotor, frontRightMotor, backRightMotor, backLeftMotor;
-    List<DcMotor> motors;
+    // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
+    static double deadwheelDistance = 35; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
+    static double perpDistance = -7.77875; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
+    static double parallelOffset = 6.985;
 
+    //red human player zone (22.5, 22.5, 0)
+    //blue human player zone(343.26,22.5, 0)
 
-    // CHANGE YEAR TO YEAR
-    final static double deadwheelDistance = 35.25; //cm; distance between deadwheels //13.875in
-    final static double perpDistance = 17.78; //cm
-    final static double parallelOffset = 9.5; //help :(
+    static final public Pose blueHumanPlayer = new Pose(343.26, 22.5, 0);
+    static final public Pose redHumanPlayer = new Pose(22.5, 22.5, 0);
+    static final public Point redGoalPosition = new Pose(365.76, 365.76);
+    static final public Point blueGoalPosition = new Pose(0, 365.76);
+    static final public Pose topBlueStart = new Pose(142.5, 22.5, 0);
+    static final public Pose topRedStart = new Pose(223.26, 22.5, 0);
+    static final public Pose bottomBlueStart = new Pose(38.9247, 308.3108, -0.75705983410735577799);
+    static final public Pose bottomRedStart = new Pose(308.1273, 318.3225, 0.75705983410735577799);
 
-
-    final static double ticksPerRev = -2003.5;
+    final static double ticksPerRev = -2000; //-2003.5
     final static double deadwheelRadius = 1.6; //cm
+
+    final static double deadwheelCircumference = 10.048;
 
     String color;
 
-    public static final Point blueGoalPosition = new Pose(365.75, 0);
-    public static final Point redGoalPosition = new Pose(365.75, 365.75);
-    public static final Pose redHumanPlayer = new Pose(22.5, 22.5);
-    public static final Pose blueHumanPlayer = new Pose(343.25, 22.5);
+
+    DcMotor frontLeftMotor;
+    DcMotor backLeftMotor;
+    DcMotor frontRightMotor;
+    DcMotor backRightMotor;
+    List<DcMotor> motors;
 
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String color, boolean isAuto)
     {
@@ -50,6 +63,7 @@ public class Odometry {
 
         this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "leftSlide"); //left tick/rev = -2002.6 (forward)
         this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "rightSlide"); //right tick/rev = -2004.4 (forward)
+        rightDeadwheel.setDirection(DcMotorSimple.Direction.REVERSE);
         this.perpDeadwheel = hardwareMap.get(DcMotorEx.class, "perpendicularOdo");
 
         if(isAuto)
@@ -92,29 +106,14 @@ public class Odometry {
 
     double deltaCenterX;
     double deltaCenterY;
-    double currentX; //cm
-    double currentY; //cm
+    static double currentX; //cm
+    static double currentY; //cm
 
-    double lastCmRight;
-    double lastCmLeft;
-    double lastCmPerp;
+    double lastFrameAngle = 0;
 
-    public void update()
-    {
-        //field 365.75cm x 365.75cm
-        cmLeft = (double)leftDeadwheel.getCurrentPosition() / ticksPerRev  * 2 * Math.PI * deadwheelRadius;
-        cmRight = (double)rightDeadwheel.getCurrentPosition() / ticksPerRev * 2 * Math.PI * deadwheelRadius;
-        cmPerp = (double)perpDeadwheel.getCurrentPosition() / ticksPerRev * 2 * Math.PI * deadwheelRadius;
+    double lastCmLeft, lastCmRight, lastCmPerp;
 
-        currentAngle = angle0 + ((cmLeft - cmRight) / deadwheelDistance);
-        currentAngle %= 2 * Math.PI;
-        currentAngle -= Math.PI;
-
-        deltaCenterX = ((cmLeft + cmRight) / 2);
-        deltaCenterY = (cmPerp - (perpDistance * currentAngle));
-
-        currentX = x0 + (deltaCenterX * Math.cos(Math.toRadians(currentAngle))) - (deltaCenterY * Math.sin(Math.toRadians(currentAngle)));
-        currentY = y0 + (deltaCenterX * Math.sin(Math.toRadians(currentAngle))) + (deltaCenterY * Math.cos(Math.toRadians(currentAngle)));
+    public void update() {
 
         // --- Read encoders (absolute) ---
         double leftPos = leftDeadwheel.getCurrentPosition();
@@ -181,19 +180,20 @@ public class Odometry {
         telemetry.addData("\nangle to goal", getAngleToGoal());
         telemetry.addData("distance to goal ", getDistToGoal());
 
-        /*telemetry.addData("deltaCenterX", deltaCenterX);
+        telemetry.addData("deltaCenterX", deltaCenterX);
         telemetry.addData("deltaCenterY", deltaCenterY);
-        telemetry.addData("currentAngle", Math.toDegrees(currentAngle));*/
+        telemetry.addData("currentAngle", Math.toDegrees(currentAngle));
+        telemetry.addData("left deadwheel", leftDeadwheel.getCurrentPosition());
+        telemetry.addData("right deadwheel", rightDeadwheel.getCurrentPosition());
+        telemetry.addData("perpendicular deadwheel", perpDeadwheel.getCurrentPosition());
     }
-    public double getAngle(AngleUnit unit)
+    public void telemetry()
     {
-        if(unit == AngleUnit.DEGREES) return Math.toDegrees(currentAngle);
-        if(unit == AngleUnit.RADIANS) return currentAngle;
-        else return -404;
+
     }
     public double getAngle()
     {
-        return getAngle(AngleUnit.DEGREES);
+        return currentAngle;
     }
     public Point getPosition()
     {
@@ -210,6 +210,16 @@ public class Odometry {
     public double getY()
     {
         return currentY;
+    }
+
+    public double getInchesFromMotorTicks(double motorTicks)
+    {
+        return (motorTicks/2000*deadwheelCircumference)/2.54;
+    }
+
+    public double getCmFromMotorTicks(double motorTicks)
+    {
+        return getInchesFromMotorTicks(motorTicks)*2.54;
     }
 
     public double getDistToGoal()
@@ -232,20 +242,21 @@ public class Odometry {
     {
         if(color.equals("blue"))
         {
-            double a = blueGoalPosition.x - getX(); //adjacent / height
-            double b = blueGoalPosition.y - getY(); //opposite / base
+            double x = blueGoalPosition.x - getX(); //adjacent / height
+            double y = blueGoalPosition.y - getY(); //opposite / base
 
-            return Math.atan(b/a);
+            return Math.atan(x/y);
         }
         if(color.equals("red"))
         {
-            double a = redGoalPosition.x - getX(); //adjacent / height
-            double b = redGoalPosition.y - getY(); //opposite / base
+            double x = redGoalPosition.x - getX(); //adjacent / height
+            double y = redGoalPosition.y - getY(); //opposite / base
 
-            return Math.atan(b/a);
+            return Math.atan(x/y);
         }
         return -404;
     }
+
 
     public void setPose(Pose pose)
     {

@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase.getCurrentGameTagLibrary;
@@ -29,14 +30,13 @@ public class BlueTeleop extends LinearOpMode
     {
         getCurrentGameTagLibrary();
         Point center = new Point();
-        ArrayList<Integer> colorList;
         AprilTagDetection aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, "blue");
         Intake intake = new Intake(hardwareMap, telemetry);
         intake.openBottomServo(false);
         intake.openTopServo(false);
         Lifting lift = new Lifting(hardwareMap, telemetry);
 
-        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue");
+        Odometry odometry = new Odometry(hardwareMap, telemetry, "blue", false);
 
         float power = 1;
         boolean lastFrameDPad = false;
@@ -86,12 +86,12 @@ public class BlueTeleop extends LinearOpMode
 
         boolean spinUpShootMotor = false;
 
-        float veloToShoot = 0;
+        double veloToShoot = 0;
 
         while (opModeIsActive())
         {
             odometry.update();
-            odometry.odometryTelemetry();
+            //odometry.odometryTelemetry();
             //intake.shootMotor.setVelocity(-odometry.getPower());
 
             center = aprilTagDetection.telemetryAprilTag();
@@ -121,12 +121,7 @@ public class BlueTeleop extends LinearOpMode
             //normal shooting
             if(gamepad2.right_trigger != 0)
             {
-                /*if(aprilTagDetection.getDistance() < 0) telemetry.addLine("Camera cannot find AprilTag! \nplease try moving back");
-                else
-                {
-                    veloToShoot = intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
-                }*/
-                veloToShoot = (float)odometry.getPower()+manualPowerOffset;//intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
+                veloToShoot = odometry.getPower()+manualPowerOffset;//intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + getManualOffset();
             }
             if(veloToShoot != 0)
             {
@@ -138,13 +133,13 @@ public class BlueTeleop extends LinearOpMode
                     intake.loading = false;
                     veloToShoot = 0;
                 }
-                intake.shoot3(veloToShoot);
+                intake.shoot3((float)veloToShoot);
+                telemetry.addData("velo",intake.shootMotor.getVelocity());
             }
             //shoot 1
             if(gamepad2.x)
             {
-                //intake.shoot(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
-                intake.shoot((float)odometry.getPower());
+                intake.shoot(intake.getPolynomialPower((float)aprilTagDetection.getDistance()) + manualPowerOffset);
             }
             //toggle start up shoot motor
             if(gamepad2.left_trigger != 0 && !lastFrameLeftTrigger2)
@@ -152,7 +147,7 @@ public class BlueTeleop extends LinearOpMode
                 spinUpShootMotor = !spinUpShootMotor;
                 lastFrameLeftTrigger2 = true;
             }
-            //if(spinUpShootMotor) intake.shootMotor.setVelocity(-1000);
+            if(spinUpShootMotor) intake.shootMotor.setVelocity(-1000);
             //toggle top servo
             if(gamepad2.right_bumper && !lastFrameRightBumper2)
             {
@@ -161,12 +156,19 @@ public class BlueTeleop extends LinearOpMode
                 lastFrameRightBumper2 = true;
             }
             //turn to goal
-            if(gamepad2.a /*&& aprilTagDetection.getDistance() > 0*/)
+            if(gamepad2.a)
             {
                 //aprilTagDetection.turnToCenterGoal(motors, .4f, 3, manualPosOffset);
-                odometry.turnToAngle(odometry.getAngleToGoal(), 1);
+                //odometry.turnToAngle(0, 1);
+                odometry.turnToAngle(odometry.getAngleToGoal()-0.025, 1);
             }
-
+            if(gamepad2.y)
+            {
+                //reset the position values
+                Odometry.x0 = 0;
+                Odometry.y0 = 0;
+                Odometry.angle0 = 0;
+            }
             if(gamepad2.dpad_up && !lastFrameDpadUp2)
             {
                 manualPowerOffset += 25;
@@ -200,18 +202,18 @@ public class BlueTeleop extends LinearOpMode
                 lastFrameB2 = true;
             }*/
 
-
-
-            /*if(aprilTagDetection.getDistance() < 0)
+            if(aprilTagDetection.getDistance() < 0)
             {
                 telemetry.addLine("|||||||| CANNOT FIND APRIL TAG!!! ||||||||");
             }
-            else telemetry.addData("aprilTag distance", aprilTagDetection.getDistance());*/
+            else telemetry.addData("aprilTag distance", aprilTagDetection.getDistance());
 
-            //telemetry.addData("aprilTag X", center.x);
+            telemetry.addData("aprilTag X", center.x);
             telemetry.addData("-------> manual power offset", manualPowerOffset);
             telemetry.addData("-------> manual turn offset", manualPosOffset);
-            telemetry.addData("odo pose", odometry.getPose());
+
+            telemetry.addData("dist from goal", odometry.getDistToGoal());
+            telemetry.addData("angle to goal", odometry.getAngleToGoal());
 
             lastFrameRight = gamepad1.dpad_right;
             lastFrameLeft = gamepad1.dpad_left;
@@ -228,5 +230,10 @@ public class BlueTeleop extends LinearOpMode
 
             telemetry.update();
         }
+
+    }
+    float getManualOffset()
+    {
+        return manualPowerOffset;
     }
 }

@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
@@ -41,8 +42,7 @@ public class RobotController {
 
         this.intake = new Intake(hardwareMap, telemetry);
         this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, color);
-        this.odometry = new Odometry(hardwareMap, telemetry, color);
-
+        this.odometry = new Odometry(hardwareMap, telemetry, color, true);
         this.aprilTagDetection.initAprilTag();
 
         this.intake.servoBottom.setPosition(intake.bottomClosePos);
@@ -315,10 +315,6 @@ public class RobotController {
         backLeftMotor.setPower(0);
     }
 
-    public void turnToAngle(float angle, float power)
-    {
-
-    }
     public double getBearing()
     {
         return aprilTagDetection.getBearing();

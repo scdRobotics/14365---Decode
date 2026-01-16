@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+ package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
 
@@ -27,7 +27,7 @@ public class Intake extends LinearOpMode
 
     private NormalizedColorSensor colorSensor;
 
-     DcMotorEx shootMotor;
+    DcMotorEx shootMotor;
     Servo servoBottom, servoTop;
     final float bottomClosePos = 0.40f;
     final float bottomOpenPos = 0.50f;
@@ -140,13 +140,6 @@ public class Intake extends LinearOpMode
         {
             shooting = true;
         }
-        if(!isBallInChamber())
-        {
-            shooting = false;
-            shootMotor.setVelocity(0);
-
-            loading = true;
-        }
         if(shooting && isAtVelo(power))
         {
             loading = true;
@@ -224,6 +217,7 @@ public class Intake extends LinearOpMode
     }
     void dropBall()
     {
+
         openTopServo(true);
         //wait <second
         sleepTime(500);
