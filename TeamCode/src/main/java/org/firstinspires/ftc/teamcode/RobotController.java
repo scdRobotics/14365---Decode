@@ -20,6 +20,7 @@ public class RobotController {
     Intake intake;
     AprilTagDetection aprilTagDetection;
     Odometry odometry;
+    Lifting lift;
 
     IMU imu;
     double angleOffset;
@@ -45,6 +46,8 @@ public class RobotController {
         this.aprilTagDetection = new AprilTagDetection(hardwareMap, telemetry, color);
         this.odometry = new Odometry(hardwareMap, telemetry, color, true);
         this.aprilTagDetection.initAprilTag();
+        this.lift = new Lifting(hardwareMap, telemetry);
+        lift.keepSlideUp();
 
         this.intake.servoBottom.setPosition(intake.bottomClosePos);
         this.intake.servoTop.setPosition(intake.topClosePos);
