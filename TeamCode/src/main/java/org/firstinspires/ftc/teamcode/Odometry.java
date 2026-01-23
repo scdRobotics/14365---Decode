@@ -18,9 +18,9 @@ public class Odometry {
     DcMotorEx perpDeadwheel;
 
     // CHANGE YEAR TO YEAR AND KILL THE BUILD TEAM IF THE CENTER OF THE ROBOT IS NOT THE CENTER OF ROTATION.
-    static double deadwheelDistance = 35; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
-    static double perpDistance = -7.77875; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
-    static double parallelOffset = 6.985;
+    public static double deadwheelDistance = 35; //120.955555; //34.798; //cm; distance between deadwheels //13.875in
+    public static double perpDistance = -10.4775; //8.382; //cm //17.78 x 8.382cm (3.3in) //19.656711932568987006907830941549cm
+    public static double parallelOffset = 5.08;
 
     //red human player zone (22.5, 22.5, 0)
     //blue human player zone(343.26,22.5, 0)
@@ -57,14 +57,18 @@ public class Odometry {
         this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
+
+
         telemetry.addLine("Odometry Initilized!");
 
         this.motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
-        this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "leftSlide"); //left tick/rev = -2002.6 (forward)
-        this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "rightSlide"); //right tick/rev = -2004.4 (forward)
-        rightDeadwheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "frontLeftMotor"); //left tick/rev = -2002.6 (forward)
+        this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "frontRightMotor"); //right tick/rev = -2004.4 (forward)
+        this.rightDeadwheel.setDirection(DcMotorSimple.Direction.REVERSE);
         this.perpDeadwheel = hardwareMap.get(DcMotorEx.class, "perpendicularOdo");
+
+        this.leftDeadwheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
         if(isAuto)
         {
@@ -148,7 +152,7 @@ public class Odometry {
         double sin = Math.sin(midHeading);
 
         currentX += dStrafe * cos - dForward * sin;
-        currentY -= dStrafe * sin + dForward * cos;
+        currentY += dStrafe * sin + dForward * cos;
         currentAngle += dTheta;
 
 

@@ -25,6 +25,7 @@ public class RobotController {
     double angleOffset;
     DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     List<DcMotor> motors;
+    List<DcMotor> motorEncoders;
 
     public RobotController(HardwareMap hardwareMap, Telemetry telemetry)
     {
@@ -53,6 +54,7 @@ public class RobotController {
         angleOffset = imu.getRobotYawPitchRollAngles().getYaw();
 
         this.motors = List.of(frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor);
+        this.motorEncoders = List.of(frontLeftMotor, frontRightMotor);
 
         for(DcMotor motor : motors)
         {
@@ -65,7 +67,7 @@ public class RobotController {
     }
     public boolean motorsAreBusy()
     {
-        for(DcMotor motor : motors)
+        for(DcMotor motor : motorEncoders)
         {
             if(motor.isBusy()) return true;
         }
@@ -76,8 +78,11 @@ public class RobotController {
         int ticks = (int)(inches*32.26);
         for (DcMotor motor : motors)
         {
-            motor.setTargetPosition(ticks);
             motor.setPower(power);
+        }
+        for (DcMotor motor : motorEncoders)
+        {
+            motor.setTargetPosition(ticks);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         while(motorsAreBusy())
@@ -87,6 +92,9 @@ public class RobotController {
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
+        }
+        for(DcMotor motor : motorEncoders)
+        {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
@@ -95,8 +103,11 @@ public class RobotController {
         int ticks = (int)(inches*32.26);
         for (DcMotor motor : motors)
         {
-            motor.setTargetPosition(-ticks);
             motor.setPower(power);
+        }
+        for (DcMotor motor : motorEncoders)
+        {
+            motor.setTargetPosition(-ticks);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         while(motorsAreBusy())
@@ -106,6 +117,9 @@ public class RobotController {
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
+        }
+        for(DcMotor motor : motorEncoders)
+        {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
@@ -116,17 +130,17 @@ public class RobotController {
         motors.get(0).setPower(power);
         motors.get(0).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motors.get(1).setTargetPosition(ticks);
+        //motors.get(1).setTargetPosition(ticks);
         motors.get(1).setPower(power);
-        motors.get(1).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motors.get(1).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         motors.get(2).setTargetPosition(ticks);
         motors.get(2).setPower(power);
         motors.get(2).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motors.get(3).setTargetPosition(-ticks);
+        //motors.get(3).setTargetPosition(-ticks);
         motors.get(3).setPower(power);
-        motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         while(motorsAreBusy())
         {
@@ -135,6 +149,9 @@ public class RobotController {
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
+        }
+        for(DcMotor motor : motorEncoders)
+        {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
@@ -145,17 +162,17 @@ public class RobotController {
         motors.get(0).setPower(power);
         motors.get(0).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motors.get(1).setTargetPosition(-ticks);
+        //motors.get(1).setTargetPosition(-ticks);
         motors.get(1).setPower(power);
-        motors.get(1).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motors.get(1).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         motors.get(2).setTargetPosition(-ticks);
         motors.get(2).setPower(power);
         motors.get(2).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motors.get(3).setTargetPosition(ticks);
+        //motors.get(3).setTargetPosition(ticks);
         motors.get(3).setPower(power);
-        motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motors.get(3).setMode(DcMotor.RunMode.RUN_TO_POSITION);
         while(motorsAreBusy())
         {
             odometry.update();
@@ -163,6 +180,9 @@ public class RobotController {
         for (DcMotor motor : motors)
         {
             motor.setPower(0);
+        }
+        for(DcMotor motor : motorEncoders)
+        {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
@@ -208,10 +228,13 @@ public class RobotController {
             for (DcMotor motor : motors)
             {
                 motor.setPower(0);
+            }
+            for(DcMotor motor : motorEncoders)
+            {
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
         }
-        for (DcMotor motor : motors)
+        for (DcMotor motor : motorEncoders)
         {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
@@ -314,7 +337,6 @@ public class RobotController {
         backRightMotor.setPower(0);
         backLeftMotor.setPower(0);
     }
-
     public double getBearing()
     {
         return aprilTagDetection.getBearing();

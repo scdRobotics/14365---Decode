@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -13,7 +14,7 @@ public class Lifting extends LinearOpMode {
     HardwareMap hardwareMap;
     Telemetry telemetry;
 
-    DcMotor leftSlide, rightSlide;
+    DcMotorEx leftSlide, rightSlide;
 
     public static final int slideStartPosition = 25;
 
@@ -22,8 +23,8 @@ public class Lifting extends LinearOpMode {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
-        leftSlide = hardwareMap.dcMotor.get("leftSlide");
-        rightSlide = hardwareMap.dcMotor.get("rightSlide");
+        leftSlide = hardwareMap.get(DcMotorEx.class, "leftSlide");
+        rightSlide = hardwareMap.get(DcMotorEx.class,"rightSlide");
 
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -36,8 +37,8 @@ public class Lifting extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftSlide = hardwareMap.dcMotor.get("leftSlide");
-        rightSlide = hardwareMap.dcMotor.get("rightSlide");
+        leftSlide = hardwareMap.get(DcMotorEx.class, "leftSlide");
+        rightSlide = hardwareMap.get(DcMotorEx.class,"rightSlide");
 
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -69,13 +70,26 @@ public class Lifting extends LinearOpMode {
     {
         rightSlide.setTargetPosition(position);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setPower(.8);
+        rightSlide.setPower(1);
     }
     public void moveLeftSlideToPosition(int position)
     {
         leftSlide.setTargetPosition(position);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setPower(.8);
+        leftSlide.setPower(1);
+    }
+    public void setLeftSlideVelo(double velo)
+    {
+        leftSlide.setVelocity(velo);
+    }
+    public void setRightSlideVelo(double velo)
+    {
+        rightSlide.setVelocity(velo);
+    }
+    public void setSlidesVelo(double velo)
+    {
+        setRightSlideVelo(velo);
+        setLeftSlideVelo(velo);
     }
     public void moveSlidesToPosition(int position)
     {
@@ -85,7 +99,26 @@ public class Lifting extends LinearOpMode {
 
     public int getSlidesPos()
     {
-        if(leftSlide.getCurrentPosition() != rightSlide.getCurrentPosition()) return Integer.MIN_VALUE;
-        else return leftSlide.getCurrentPosition();
+        return (leftSlide.getCurrentPosition()+rightSlide.getCurrentPosition())/2;
+    }
+    public String getSlideVelo()
+    {
+        return "Left: " + leftSlide.getVelocity() + ", Right: " + rightSlide.getVelocity();
+    }
+    public int getSlideTargetPosition()
+    {
+        return (leftSlide.getTargetPosition()+rightSlide.getTargetPosition())/2;
+    }
+
+    public void keepSlideUp()
+    {
+        moveSlidesToPosition(-30);
+    }
+
+
+    public void holdSlides()
+    {
+        moveLeftSlideToPosition(leftSlide.getCurrentPosition());
+        moveRightSlideToPosition(rightSlide.getCurrentPosition());
     }
 }

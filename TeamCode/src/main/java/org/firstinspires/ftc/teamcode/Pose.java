@@ -22,6 +22,6 @@ public class Pose extends Point {
     @Override
     public String toString()
     {
-        return "(" + (int)x + ", " + (int)y + ") angle: " + getAngleDegrees() + " degrees";
+        return "(" + (float)x + ", " + (float)y + ") angle: " + getAngleDegrees() + " degrees";
     }
 }

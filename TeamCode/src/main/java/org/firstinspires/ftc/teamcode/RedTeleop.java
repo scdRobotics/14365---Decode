@@ -35,6 +35,8 @@ public class RedTeleop extends LinearOpMode
         intake.openBottomServo(false);
         intake.openTopServo(false);
         Lifting lift = new Lifting(hardwareMap, telemetry);
+        lift.keepSlideUp();
+
 
         Odometry odometry = new Odometry(hardwareMap, telemetry, "red", false);
 
@@ -60,8 +62,8 @@ public class RedTeleop extends LinearOpMode
         // If your robot moves backwards when commanded to go forwards,
         // reverse the left side instead.
         // See the note about this earlier on this page.
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
@@ -88,6 +90,8 @@ public class RedTeleop extends LinearOpMode
 
         double veloToShoot = 0;
 
+        int currentSlidePos = -30;
+
         while (opModeIsActive())
         {
             odometry.update();
@@ -106,10 +110,10 @@ public class RedTeleop extends LinearOpMode
                 x = -gamepad2.left_stick_x * 1.1/2;
             }
 
-            double frontLeftPower = -(y + x + rx);
-            double backLeftPower = -(y - x + rx);
-            double frontRightPower = -(y - x - rx);
-            double backRightPower = -(y + x - rx);
+            double frontLeftPower = -(y + x - rx);
+            double backLeftPower = -(y - x - rx);
+            double frontRightPower = (y - x + rx);
+            double backRightPower = -(y + x + rx);
 
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
@@ -194,6 +198,11 @@ public class RedTeleop extends LinearOpMode
             {
                 odometry.setPose(odometry.redHumanPlayer);
             }
+
+            lift.moveSlidesToPosition(currentSlidePos);
+            if(gamepad1.dpad_down) currentSlidePos+=10;
+            if(gamepad1.dpad_up) currentSlidePos-=10;
+
             //lifting?
             /*if(gamepad2.b && !lastFrameB2)
             {
@@ -214,6 +223,17 @@ public class RedTeleop extends LinearOpMode
 
             telemetry.addData("dist from goal", odometry.getDistToGoal());
             telemetry.addData("angle to goal", odometry.getAngleToGoal());
+
+            telemetry.addData("\nleft slide pos", lift.leftSlide.getCurrentPosition());
+            telemetry.addData("right slide pos", lift.rightSlide.getCurrentPosition());
+
+            telemetry.addData("left slide target pos", lift.leftSlide.getTargetPosition());
+            telemetry.addData("right slide target pos", lift.rightSlide.getTargetPosition());
+
+            telemetry.addData("odometry pose", odometry.getPose());
+
+
+            telemetry.addLine(lift.getSlideVelo());
 
             lastFrameRight = gamepad1.dpad_right;
             lastFrameLeft = gamepad1.dpad_left;
