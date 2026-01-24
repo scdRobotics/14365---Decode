@@ -77,10 +77,10 @@ public class RobotController {
     }
 
     public void moveForward(float time, float power) {
-        motors[0].setPower(-power);
-        motors[1].setPower(-power);
-        motors[2].setPower(power);
-        motors[3].setPower(-power);
+        motors.get(0).setPower(-power);
+        motors.get(1).setPower(-power);
+        motors.get(2).setPower(power);
+        motors.get(3).setPower(-power);
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime >= time) {
             odometry.update();
@@ -91,12 +91,12 @@ public class RobotController {
     }
 
     public void moveBackward(float time, float power) {
-        motors[0].setPower(power);
-        motors[1].setPower(power);
-        motors[2].setPower(-power);
-        motors[3].setPower(power);
+        motors.get(0).setPower(power);
+        motors.get(1).setPower(power);
+        motors.get(2).setPower(-power);
+        motors.get(3).setPower(power);
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime >= time) {
+        while (System.currentTimeMillis() - startTime <= time) {
             odometry.update();
         }
         for (DcMotor motor : motors) {
@@ -105,12 +105,12 @@ public class RobotController {
     }
 
     public void moveLeft(float time, float power) {
-        motors[0].setPower(power);
-        motors[1].setPower(-power);
-        motors[2].setPower(power);
-        motors[3].setPower(-power);
+        motors.get(0).setPower(power);
+        motors.get(1).setPower(-power);
+        motors.get(2).setPower(power);
+        motors.get(3).setPower(-power);
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime >= time) {
+        while (System.currentTimeMillis() - startTime <= time) {
             odometry.update();
         }
         for (DcMotor motor : motors) {
@@ -119,12 +119,12 @@ public class RobotController {
     }
 
     public void moveRight(float time, float power) {
-        motors[0].setPower(-power);
-        motors[1].setPower(power);
-        motors[2].setPower(-power);
-        motors[3].setPower(power);
+        motors.get(0).setPower(-power);
+        motors.get(1).setPower(power);
+        motors.get(2).setPower(-power);
+        motors.get(3).setPower(power);
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime >= time) {
+        while (System.currentTimeMillis() - startTime <= time) {
             odometry.update();
         }
         for (DcMotor motor : motors) {
