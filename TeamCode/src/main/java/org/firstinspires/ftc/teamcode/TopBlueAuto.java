@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 @Autonomous
 public class TopBlueAuto extends LinearOpMode {
+
     public void runOpMode() {
         RobotController rc = new RobotController(hardwareMap, telemetry, "blue");
         //Odometry odometry = new Odometry(hardwareMap, telemetry, "blue");
@@ -14,6 +17,6 @@ public class TopBlueAuto extends LinearOpMode {
 
         rc.shoot3(1725);
         rc.intake.shootMotor.setVelocity(0);
-        rc.moveForward(20, 0.4f);
+        rc.moveForward(0.5f, 0.6f);
     }
 }
