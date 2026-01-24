@@ -12,8 +12,8 @@ public class BottomRedAuto extends LinearOpMode {
 
         waitForStart();
 
-        rc.moveBackward(0.6f, 0.5f);
+        rc.moveBackward(600f, 0.5f);
         rc.shoot3(1400);
-        rc.moveRight(0.5f, 0.5f);
+        rc.moveRight(500f, 0.5f);
     }
 }

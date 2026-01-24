@@ -63,6 +63,9 @@ public class Odometry {
 
         this.motors = List.of(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor);
 
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         this.leftDeadwheel = hardwareMap.get(DcMotorEx.class, "frontLeftMotor"); //left tick/rev = -2002.6 (forward)
         this.rightDeadwheel = hardwareMap.get(DcMotorEx.class, "frontRightMotor"); //right tick/rev = -2004.4 (forward)
         this.rightDeadwheel.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -296,10 +299,10 @@ public class Odometry {
                 this.update();
                 double dist = Math.abs(getAngle()-angle);
                 double p = power * Math.min(1, dist*distMult);
-                p = Math.max(0.3,p);
+                p = Math.max(0.4,p);
                 this.frontLeftMotor.setPower(p);
                 this.backLeftMotor.setPower(p);
-                this.frontRightMotor.setPower(-p);
+                this.frontRightMotor.setPower(p);//this was negative
                 this.backRightMotor.setPower(-p);
                 telemetry.addData("power to turn at", p);
                 telemetry.update();
@@ -315,7 +318,7 @@ public class Odometry {
                 p = Math.max(0.3,p);
                 this.frontLeftMotor.setPower(-p);
                 this.backLeftMotor.setPower(-p);
-                this.frontRightMotor.setPower(p);
+                this.frontRightMotor.setPower(-p);
                 this.backRightMotor.setPower(p);
                 telemetry.addData("power to turn at", p);
                 telemetry.update();

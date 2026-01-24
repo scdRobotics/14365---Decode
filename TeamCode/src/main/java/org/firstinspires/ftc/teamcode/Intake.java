@@ -43,7 +43,7 @@ public class Intake extends LinearOpMode
 
     public Intake(HardwareMap hardwareMap, Telemetry telemetry)
     {
-        shootMotor = hardwareMap.get(DcMotorEx.class, "shootMotor");
+       shootMotor = hardwareMap.get(DcMotorEx.class, "shootMotor");
 
         servoBottom = hardwareMap.get(Servo.class, "bottomIntakeServo");
         servoTop = hardwareMap.get(Servo.class, "topIntakeServo");

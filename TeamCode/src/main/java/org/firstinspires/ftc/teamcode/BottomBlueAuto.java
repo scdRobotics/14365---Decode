@@ -12,8 +12,8 @@ public class BottomBlueAuto extends LinearOpMode {
 
         waitForStart();
 
-        rc.moveBackward(0.6f, 0.5f);
+        rc.moveBackward(600f, 0.5f);
         rc.shoot3(1400);
-        rc.moveLeft(0.5f, 0.5f);
+        rc.moveLeft(500f, 0.5f);
     }
 }

@@ -15,8 +15,8 @@ public class TopBlueAuto extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        rc.shoot3(1725);
+        rc.shoot3(1700);
         rc.intake.shootMotor.setVelocity(0);
-        rc.moveForward(0.5f, 0.6f);
+        rc.moveBackward(1000f, 0.6f);
     }
 }

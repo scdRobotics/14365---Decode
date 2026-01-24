@@ -82,7 +82,7 @@ public class RobotController {
         motors.get(2).setPower(power);
         motors.get(3).setPower(-power);
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime >= time) {
+        while (System.currentTimeMillis() - startTime <= time) {
             odometry.update();
         }
         for (DcMotor motor : motors) {

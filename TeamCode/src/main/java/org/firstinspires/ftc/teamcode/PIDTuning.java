@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,9 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@TeleOp
-public class PIDTuning extends LinearOpMode {
-    static PIDFCoefficients pidCoefficients;
+//@TeleOp
+public class PIDTuning /*extends LinearOpMode*/ {
+    /*static PIDFCoefficients pidCoefficients;
     static double p,i,d,f;
 
     public void runOpMode()
@@ -86,5 +86,5 @@ public class PIDTuning extends LinearOpMode {
             telemetry.addData("interval", interval);
             telemetry.update();
         }
-    }
+    }*/
 }
